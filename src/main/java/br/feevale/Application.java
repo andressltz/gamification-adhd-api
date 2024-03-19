@@ -13,11 +13,6 @@ public class Application {
 		SpringApplication.run(Application.class, args);
 	}
 
-	@RequestMapping("/")
-	public String root() {
-		return "Up";
-	}
-
 	@RequestMapping("/healthcheck")
 	public String healthcheck() {
 		return "Up";
