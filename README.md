@@ -1,6 +1,6 @@
 # gamification-adhd-api
 
-## How run local
+## How to run local
 
 Docker:
 ```

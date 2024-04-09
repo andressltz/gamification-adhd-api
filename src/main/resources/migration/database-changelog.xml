@@ -6,6 +6,6 @@
 		xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog/1.9
         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-1.9.xsd">
 
-<!--	<include relativeToChangelogFile="true" file="teste.sql"/>-->
+	<include relativeToChangelogFile="true" file="iteration-1/create_table_user.sql"/>
 
 </databaseChangeLog>
