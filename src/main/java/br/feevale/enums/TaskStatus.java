@@ -5,7 +5,8 @@ public enum TaskStatus {
 	DO_NOT_STARTED(1),
 	DOING(2),
 	PAUSED(3),
-	FINISHED(4);
+	FINISHED(4),
+	BLOCKED(5);
 
 	private int value;
 

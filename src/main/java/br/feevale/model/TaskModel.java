@@ -1,7 +1,6 @@
 package br.feevale.model;
 
 import br.feevale.enums.TaskStatus;
-import br.feevale.enums.UserType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;

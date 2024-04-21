@@ -44,7 +44,6 @@ public class TaskService {
 	}
 
 	public List<TaskModel> findAll() {
-		// Todo implement
-		return new ArrayList<>();
+		return repository.findAll();
 	}
 }

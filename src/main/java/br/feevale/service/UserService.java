@@ -1,5 +1,6 @@
 package br.feevale.service;
 
+import br.feevale.enums.UserType;
 import br.feevale.exceptions.CustomException;
 import br.feevale.model.UserModel;
 import br.feevale.repository.UserRepository;
@@ -13,8 +14,10 @@ import java.nio.charset.StandardCharsets;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.KeySpec;
+import java.util.ArrayList;
 import java.util.Base64;
 import java.util.Date;
+import java.util.List;
 
 @Component
 public class UserService {
@@ -22,6 +25,7 @@ public class UserService {
 	private static final String PASS_SALT = "u2cHHUAIEDYKkDjCj2FkKHFKo1EtDuiBFEEVALE";
 	private static final String REGEX_EMAIL = "[^\\s]+@[^\\s]+\\.[^\\s]+";
 	private static final String REGEX_PASSWORD = "[^\\s]{6,10}";
+	private static final String REGEX_PHONE = "[^0-9]";
 
 	@Autowired
 	private UserRepository repository;
@@ -35,7 +39,7 @@ public class UserService {
 	}
 
 	public UserModel findByEmailAndPassword(String email, String password) {
-		return repository.findByEmailAndPassword(email, encryptPassword(password));
+		return repository.findByEmailAndPassword(email.toLowerCase().trim(), encryptPassword(password.trim()));
 	}
 
 //	public User findById(Long userId) {
@@ -49,12 +53,13 @@ public class UserService {
 
 	private UserModel saveNewUser(UserModel user) {
 		validateUser(user);
-		user.setPassword(encryptPassword(user.getPassword()));
+		user.setEmail(user.getEmail().toLowerCase().trim());
+		user.setPassword(encryptPassword(user.getPassword().trim()));
 
 		user.setDtCreate(new Date());
 		user.setDtUpdate(new Date());
 		user = repository.save(user);
-		user.setPassword(null);
+		cleanUser(user);
 		return user;
 	}
 
@@ -94,7 +99,7 @@ public class UserService {
 		validateUser(user);
 		user.setDtUpdate(new Date());
 		user = repository.save(user);
-		user.setPassword(null);
+		cleanUser(user);
 		return user;
 	}
 
@@ -111,7 +116,7 @@ public class UserService {
 		}
 	}
 
-	private void validateUser(@NotNull UserModel user) throws RuntimeException {
+	private void validateUser(@NotNull UserModel user) throws CustomException {
 		if (user.getEmail() == null || !user.getEmail().trim().matches(REGEX_EMAIL)) {
 			throw new CustomException("E-mail inválido.");
 		}
@@ -128,15 +133,63 @@ public class UserService {
 			throw new CustomException("Tipo de usuário não informado.");
 		}
 
-		if (repository.findByEmail(user.getEmail().trim()) != null) {
+		if (repository.findByEmail(user.getEmail().toLowerCase().trim()) != null) {
 			throw new CustomException("E-mail já cadastrado.");
+		}
+
+		if (user.getPhone() != null && !user.getPhone().isEmpty() && user.getPhone().replaceAll(REGEX_PHONE, "").length() != 11) {
+			throw new CustomException("O telefone deve ser no formato (11) 98765-4321");
 		}
 	}
 
 	public UserModel findById(Long userId) {
 		UserModel user = repository.getReferenceById(userId);
-		user.setPassword(null);
+		cleanUser(user);
 		return user;
 	}
 
+	public UserModel findByIdInternal(Long userId) {
+		return repository.getReferenceById(userId);
+	}
+
+	public void cleanUser(UserModel user) {
+		user.setPassword(null);
+	}
+
+	public UserModel relatePatient(UserModel loggedUser, UserModel patientParam) {
+		if (patientParam != null) {
+			UserModel patient = null;
+			if (patientParam.getEmail() != null && !patientParam.getEmail().isEmpty()) {
+				patient = repository.findByEmail(patientParam.getEmail().toLowerCase().trim());
+			} else if (patientParam.getPhone() != null && !patientParam.getPhone().isEmpty()) {
+				List<UserModel> results = repository.findByPhone(patientParam.getPhone().replaceAll(REGEX_PHONE, ""));
+				if (results != null)
+					if (results.size() > 1) {
+						throw new CustomException("Encontrados alguns registros com o telefone informado. Por favor, busque pelo email.");
+					} else {
+						patient = results.stream().findFirst().get();
+					}
+			}
+
+			if (patient == null) {
+				throw new CustomException("Não foi possível localizar o paciente.");
+			}
+
+			if (!UserType.PATIENT.equals(patient.getType())) {
+				throw new CustomException("Só é possível vincular pacientes.");
+			}
+
+			if (loggedUser.getPatients() == null || loggedUser.getPatients().isEmpty()) {
+				loggedUser.setPatients(new ArrayList<>());
+			} else if (loggedUser.getPatients().contains(patient)) {
+				throw new CustomException("Paciente já esta vinculado.");
+			}
+			loggedUser.getPatients().add(patient);
+			repository.save(loggedUser);
+
+			return patient;
+
+		}
+		throw new CustomException("Não foi possível vincular o paciente.");
+	}
 }

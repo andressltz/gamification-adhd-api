@@ -8,8 +8,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
-import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.util.Date;
+import java.util.List;
 import java.util.UUID;
 
 @Component
@@ -27,23 +28,10 @@ public class SessionService {
 			throw new CustomException("E-mail ou senha inválidos");
 		}
 
-		return authorize(userRes);
-	}
-
-	public SessionModel authorize(UserModel user) {
-		SessionModel session = new SessionModel();
-		session.setUser(user);
-		session.setToken(UUID.randomUUID().toString());
-		LocalDateTime dateExpiration = LocalDateTime.now().plusDays(90);
-		session.setExpiration(Date.from(dateExpiration.atZone(ZoneId.systemDefault()).toInstant()));
-
-		session.setDtCreate(new Date());
-		session.setDtUpdate(new Date());
-		repository.save(session);
-
-		session.setId(null);
-		session.setUser(null);
-		return session;
+		SessionModel userSession = authorize(userRes);
+		userService.cleanUser(userSession.getUser());
+		userSession.setId(null);
+		return userSession;
 	}
 
 	public long getAuthorizedUserId(String token) {
@@ -52,6 +40,33 @@ public class SessionService {
 			return session.getUser().getId();
 		}
 		throw new CustomException("Usuário não autorizado.");
+	}
+
+	private SessionModel authorize(UserModel user) {
+		if (user == null) {
+			return null;
+		}
+
+		List<SessionModel> sessions = repository.getByUser(user);
+		if (sessions != null && !sessions.isEmpty()) {
+			return sessions.stream().findFirst().get();
+		}
+		return createNewSession(user);
+	}
+
+	private SessionModel createNewSession(UserModel user) {
+		SessionModel newSession = new SessionModel();
+		newSession.setUser(user);
+		newSession.setToken(UUID.randomUUID().toString());
+		newSession.setExpiration(Date.from(LocalDateTime.now().plusDays(90).toInstant(ZoneOffset.of("-03:00"))));
+
+		newSession.setDtCreate(new Date());
+		newSession.setDtUpdate(new Date());
+		repository.save(newSession);
+
+		newSession.setId(null);
+		userService.cleanUser(newSession.getUser());
+		return newSession;
 	}
 
 }

@@ -2,19 +2,18 @@ package br.feevale.enums;
 
 public enum UserType {
 
-	PATIENT(1),
-	PARENT(2),
-	PROFESSIONAL(3);
+	PARENT(1, 0),
+	PATIENT(2, 1),
+	PROFESSIONAL(3, 2);
 
 	private int value;
 
-	UserType(int value) {
-		this.value = value;
-	}
+	private int ordinal;
 
-//	public int getValue() {
-//		return value;
-//	}
+	UserType(int value, int ordinal) {
+		this.value = value;
+		this.ordinal = ordinal;
+	}
 
 	public void setValue(int value) {
 		this.value = value;
@@ -27,6 +26,5 @@ public enum UserType {
 	public void setValue(String value) {
 		this.value = Integer.parseInt(value);
 	}
-
 
 }
