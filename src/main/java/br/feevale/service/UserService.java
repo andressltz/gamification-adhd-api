@@ -149,7 +149,11 @@ public class UserService {
 	}
 
 	public UserModel findByIdInternal(Long userId) {
-		return repository.getReferenceById(userId);
+		UserModel userModel = repository.getReferenceById(userId);
+		if (userModel.getPhone() != null) {
+			userModel.setPhoneFormated(userModel.getPhone().replaceFirst("(\\d{2})(\\d{5})(\\d+)", "($1) $2-$3"));
+		}
+		return userModel;
 	}
 
 	public void cleanUser(UserModel user) {
