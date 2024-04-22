@@ -36,9 +36,9 @@ stages:
               mavenPomFile: 'pom.xml'
               RuntimeStack: 'JAVA|17-java17'
           #        mavenOptions: '-Xmx3072m'
-              javaHomeOption: 'JDKVersion'
-              jdkVersionOption: '1.8'
-              jdkArchitectureOption: 'x64'
+              javaHomeOption: JDKVersion
+              jdkVersionOption: 1.17
+              jdkArchitectureOption: x64
           #        publishJUnitResults: true
           #        testResultsFiles: '**/surefire-reports/TEST-*.xml'
           #        goals: 'package'
