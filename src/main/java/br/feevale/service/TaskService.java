@@ -5,7 +5,6 @@ import br.feevale.repository.TaskRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -45,5 +44,13 @@ public class TaskService {
 
 	public List<TaskModel> findAll() {
 		return repository.findAll();
+	}
+
+	public List<TaskModel> findAllByPatient(long idPatient, boolean loggedUserIsPatient) {
+		if (loggedUserIsPatient) {
+			return repository.findToPatient(idPatient);
+		} else {
+			return repository.findByPatientId(idPatient);
+		}
 	}
 }

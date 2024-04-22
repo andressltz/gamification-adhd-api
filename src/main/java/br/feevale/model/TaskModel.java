@@ -22,16 +22,15 @@ public class TaskModel extends DefaultModel {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	@Column(name = "idTask", nullable = false)
+	@Column(name = "id_task", nullable = false)
 	private Long id;
 
 	@OneToOne
 	@JoinColumn(nullable = false)
 	private UserModel patient;
 
-	@OneToOne
-	@JoinColumn(nullable = false)
-	private UserModel owner;
+	@Column(nullable = false, name = "owner_id_user")
+	private Long ownerId;
 
 	@Column(nullable = false)
 	private String title;

@@ -30,4 +30,8 @@ public class BaseController {
 		return !UserType.PATIENT.equals(userModel.getType());
 	}
 
+	protected boolean isPatient(UserModel userModel) {
+		return UserType.PATIENT.equals(userModel.getType());
+	}
+
 }

@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @RestController
@@ -29,8 +30,10 @@ public class TaskController extends BaseController {
 
 	@ResponseBody
 	@PostMapping()
-	public DefaultResponse<TaskModel> postNew(@RequestBody TaskModel taskModel) {
+	public DefaultResponse<TaskModel> postNew(@RequestHeader HttpHeaders headers, @RequestBody TaskModel taskModel) {
 		try {
+			final UserModel loggedUser = getAuthUser(headers);
+			taskModel.setOwnerId(loggedUser.getId());
 			return new DefaultResponse<>(taskService.save(taskModel));
 		} catch (CustomException ex) {
 			return new DefaultResponse<>(ex);
@@ -42,7 +45,10 @@ public class TaskController extends BaseController {
 	public DefaultResponse<List<TaskModel>> getAll(@RequestHeader HttpHeaders headers) {
 		try {
 			final UserModel loggedUser = getAuthUser(headers);
-			return new DefaultResponse<>(taskService.findAll());
+			if (isPatient(loggedUser)) {
+				return new DefaultResponse<>(taskService.findAllByPatient(loggedUser.getId(), isPatient(loggedUser)));
+			}
+			return new DefaultResponse<>(new ArrayList<>());
 		} catch (CustomException ex) {
 			return new DefaultResponse<>(ex);
 		}
@@ -74,6 +80,17 @@ public class TaskController extends BaseController {
 	public DefaultResponse<TaskModel> deleteById(@PathVariable long id) {
 		try {
 			return new DefaultResponse<>(taskService.deleteById(id));
+		} catch (CustomException ex) {
+			return new DefaultResponse<>(ex);
+		}
+	}
+
+	@ResponseBody
+	@GetMapping("/user/{idPatient}")
+	public DefaultResponse<List<TaskModel>> getTasksByPatient(@RequestHeader HttpHeaders headers, @PathVariable long idPatient) {
+		try {
+			final UserModel loggedUser = getAuthUser(headers);
+			return new DefaultResponse<>(taskService.findAllByPatient(idPatient, isPatient(loggedUser)));
 		} catch (CustomException ex) {
 			return new DefaultResponse<>(ex);
 		}
