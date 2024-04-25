@@ -55,10 +55,13 @@ public class TaskController extends BaseController {
 	}
 
 	@ResponseBody
-	@GetMapping("/{id}")
-	public DefaultResponse<TaskModel> getById(@PathVariable long id) {
+	@GetMapping("/{idTask}")
+	public DefaultResponse<TaskModel> getById(@RequestHeader HttpHeaders headers, @PathVariable long idTask) {
 		try {
-			return new DefaultResponse<>(taskService.findById(id));
+			final UserModel loggedUser = getAuthUser(headers);
+			TaskModel taskModel = taskService.findById(idTask, loggedUser, isPatient(loggedUser));
+			taskModel.setPatient(null);
+			return new DefaultResponse<>(taskModel);
 		} catch (CustomException ex) {
 			return new DefaultResponse<>(ex);
 		}
