@@ -23,15 +23,17 @@ public class SessionService {
 	private UserService userService;
 
 	public SessionModel login(UserModel userParam) {
-		UserModel userRes = userService.findByEmailAndPassword(userParam.getEmail(), userParam.getPassword());
-		if (userRes == null) {
-			throw new CustomException("E-mail ou senha inválidos");
+		if (userParam != null && userParam.getEmail() != null && userParam.getPassword() != null) {
+			UserModel userRes = userService.findByEmailAndPassword(userParam.getEmail(), userParam.getPassword());
+			if (userRes != null) {
+				SessionModel userSession = authorize(userRes);
+				userService.cleanUser(userSession.getUser());
+				userSession.setId(null);
+				return userSession;
+			}
 		}
 
-		SessionModel userSession = authorize(userRes);
-		userService.cleanUser(userSession.getUser());
-		userSession.setId(null);
-		return userSession;
+		throw new CustomException("E-mail ou senha inválidos");
 	}
 
 	public long getAuthorizedUserId(String token) {
