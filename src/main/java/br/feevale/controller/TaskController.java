@@ -98,4 +98,15 @@ public class TaskController extends BaseController {
 			return new DefaultResponse<>(ex);
 		}
 	}
+
+	@ResponseBody
+	@PostMapping("/{idTask}/start")
+	public DefaultResponse<TaskModel> postTaskStart(@RequestHeader HttpHeaders headers, @PathVariable long idTask) {
+		try {
+			final UserModel loggedUser = getAuthUser(headers);
+			return new DefaultResponse<>(taskService.startTask(idTask, loggedUser));
+		} catch (CustomException ex) {
+			return new DefaultResponse<>(ex);
+		}
+	}
 }

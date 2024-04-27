@@ -66,4 +66,9 @@ public class TaskService {
 			return repository.findByPatientId(idPatient);
 		}
 	}
+
+	public TaskModel startTask(long idTask, UserModel loggedUser) {
+		// Todo implement
+		return new TaskModel();
+	}
 }
