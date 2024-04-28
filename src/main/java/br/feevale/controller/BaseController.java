@@ -1,6 +1,5 @@
 package br.feevale.controller;
 
-import br.feevale.enums.UserType;
 import br.feevale.model.UserModel;
 import br.feevale.service.SessionService;
 import br.feevale.service.UserService;
@@ -24,14 +23,6 @@ public class BaseController {
 		}
 		Long userId = sessionService.getAuthorizedUserId(token.replace("Bearer ", ""));
 		return userService.findByIdInternal(userId);
-	}
-
-	protected boolean isNotPatient(UserModel userModel) {
-		return !UserType.PATIENT.equals(userModel.getType());
-	}
-
-	protected boolean isPatient(UserModel userModel) {
-		return UserType.PATIENT.equals(userModel.getType());
 	}
 
 }

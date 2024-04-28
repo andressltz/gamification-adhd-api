@@ -4,6 +4,7 @@ import br.feevale.core.DefaultResponse;
 import br.feevale.exceptions.CustomException;
 import br.feevale.model.UserModel;
 import br.feevale.service.UserService;
+import br.feevale.utils.UserUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -58,7 +59,7 @@ public class UserController extends BaseController {
 	public DefaultResponse<UserModel> relatePatient(@RequestHeader HttpHeaders headers, @RequestBody UserModel patient) {
 		try {
 			final UserModel loggedUser = getAuthUser(headers);
-			if (isNotPatient(loggedUser)) {
+			if (UserUtils.isNotPatient(loggedUser)) {
 				return new DefaultResponse<>(userService.relatePatient(loggedUser, patient));
 			}
 			throw new CustomException("Operação não permitida para pacientes.");

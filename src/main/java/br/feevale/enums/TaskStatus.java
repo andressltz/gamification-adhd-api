@@ -2,20 +2,20 @@ package br.feevale.enums;
 
 public enum TaskStatus {
 
-	DO_NOT_STARTED(1),
-	DOING(2),
-	PAUSED(3),
-	FINISHED(4),
-	BLOCKED(5);
+	DO_NOT_STARTED(0),
+	DOING(1),
+	PAUSED(2),
+	FINISHED(3),
+	BLOCKED(4);
 
-	private int value;
+	private int ordinal;
 
-	TaskStatus(int value) {
-		this.value = value;
+	TaskStatus(int ordinal) {
+		this.ordinal = ordinal;
 	}
 
-	public int getValue() {
-		return value;
+	public int getOrdinal() {
+		return ordinal;
 	}
 
 }

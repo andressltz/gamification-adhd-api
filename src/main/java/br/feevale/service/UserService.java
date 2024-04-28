@@ -42,15 +42,6 @@ public class UserService {
 		return repository.findByEmailAndPassword(email.toLowerCase().trim(), encryptPassword(password.trim()));
 	}
 
-//	public User findById(Long userId) {
-//		User user = repository.findById(userId).orElse(null);
-//		if (user != null) {
-//			user.setPassword(null);
-//			return user;
-//		}
-//		return user;
-//	}
-
 	private UserModel saveNewUser(UserModel user) {
 		validateUser(user);
 		user.setEmail(user.getEmail().toLowerCase().trim());
@@ -64,38 +55,6 @@ public class UserService {
 	}
 
 	private UserModel update(UserModel user) {
-//		UserModel currentUser = repository.findById(user.getId()).orElse(null);
-
-//		if (currentUser == null) {
-//			throw new CustomException("Usuário inválido.");
-//		}
-
-//		user.setEmail(currentUser.getEmail());
-
-//		if (user.getPassword() != null && !user.getPassword().trim().equals("")
-//			&& user.getCurrentpassword() != null && !user.getCurrentpassword().trim().equals("")) {
-//
-//			if (!encryptPassword(user.getCurrentpassword()).equals(currentUser.getPassword())) {
-//				throw new CustomException("Senha incorreta.");
-//			}
-//
-//			if (!user.getPassword().matches(passwordRegex)) {
-//				throw new CustomException("Senha inválida.");
-//			}
-//
-//			if (!user.getConfpassword().equals(user.getPassword())) {
-//				throw new CustomException("Senha não conferem.");
-//			}
-//
-//			user.setPassword(encryptPassword(user.getPassword()));
-//		} else {
-//			user.setPassword(currentUser.getPassword());
-//		}
-//
-//		if (user.getName() == null || user.getName().trim().equals("")) {
-//			throw new CustomException("Nome inválido");
-//		}
-
 		validateUser(user);
 		user.setDtUpdate(new Date());
 		user = repository.save(user);
@@ -140,12 +99,6 @@ public class UserService {
 		if (user.getPhone() != null && !user.getPhone().isEmpty() && user.getPhone().replaceAll(REGEX_PHONE, "").length() != 11) {
 			throw new CustomException("O telefone deve ser no formato (11) 98765-4321");
 		}
-	}
-
-	public UserModel findById(Long userId) {
-		UserModel user = repository.getReferenceById(userId);
-		cleanUser(user);
-		return user;
 	}
 
 	public UserModel findByIdInternal(Long userId) {
