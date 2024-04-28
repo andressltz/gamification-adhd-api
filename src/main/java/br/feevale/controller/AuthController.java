@@ -4,7 +4,7 @@ import br.feevale.core.DefaultResponse;
 import br.feevale.exceptions.CustomException;
 import br.feevale.model.SessionModel;
 import br.feevale.model.UserModel;
-import br.feevale.service.SessionService;
+import br.feevale.service.impl.SessionServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class AuthController {
 
 	@Autowired
-	private SessionService sessionService;
+	private SessionServiceImpl sessionService;
 
 	@ResponseBody
 	@PostMapping()

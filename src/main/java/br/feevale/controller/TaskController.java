@@ -1,13 +1,12 @@
 package br.feevale.controller;
 
 import br.feevale.core.DefaultResponse;
+import br.feevale.dtos.UserDto;
 import br.feevale.exceptions.CustomException;
 import br.feevale.model.TaskModel;
-import br.feevale.model.UserModel;
 import br.feevale.service.TaskService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
-import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -32,7 +31,7 @@ public class TaskController extends BaseController {
 	@PostMapping()
 	public DefaultResponse<TaskModel> postNew(@RequestHeader HttpHeaders headers, @RequestBody TaskModel taskModel) {
 		try {
-			final UserModel loggedUser = getAuthUser(headers);
+			final UserDto loggedUser = getAuthUser(headers);
 			taskModel.setOwnerId(loggedUser.getId());
 			return new DefaultResponse<>(taskService.save(taskModel));
 		} catch (CustomException ex) {
@@ -44,9 +43,9 @@ public class TaskController extends BaseController {
 	@GetMapping()
 	public DefaultResponse<List<TaskModel>> getAll(@RequestHeader HttpHeaders headers) {
 		try {
-			final UserModel loggedUser = getAuthUser(headers);
-			if (isPatient(loggedUser)) {
-				return new DefaultResponse<>(taskService.findAllByPatient(loggedUser.getId(), isPatient(loggedUser)));
+			final UserDto loggedUser = getAuthUser(headers);
+			if (loggedUser.isPatient()) {
+				return new DefaultResponse<>(taskService.findAllByPatient(loggedUser.getId(), true));
 			}
 			return new DefaultResponse<>(new ArrayList<>());
 		} catch (CustomException ex) {
@@ -58,8 +57,8 @@ public class TaskController extends BaseController {
 	@GetMapping("/{idTask}")
 	public DefaultResponse<TaskModel> getById(@RequestHeader HttpHeaders headers, @PathVariable long idTask) {
 		try {
-			final UserModel loggedUser = getAuthUser(headers);
-			TaskModel taskModel = taskService.findById(idTask, loggedUser, isPatient(loggedUser));
+			final UserDto loggedUser = getAuthUser(headers);
+			TaskModel taskModel = taskService.findById(idTask, loggedUser);
 			taskModel.setPatient(null);
 			return new DefaultResponse<>(taskModel);
 		} catch (CustomException ex) {
@@ -78,22 +77,22 @@ public class TaskController extends BaseController {
 		}
 	}
 
-	@ResponseBody
-	@DeleteMapping("/{id}")
-	public DefaultResponse<TaskModel> deleteById(@PathVariable long id) {
-		try {
-			return new DefaultResponse<>(taskService.deleteById(id));
-		} catch (CustomException ex) {
-			return new DefaultResponse<>(ex);
-		}
-	}
+//	@ResponseBody
+//	@DeleteMapping("/{id}")
+//	public DefaultResponse<TaskModel> deleteById(@PathVariable long id) {
+//		try {
+//			return new DefaultResponse<>(taskService.deleteById(id));
+//		} catch (CustomException ex) {
+//			return new DefaultResponse<>(ex);
+//		}
+//	}
 
 	@ResponseBody
 	@GetMapping("/user/{idPatient}")
 	public DefaultResponse<List<TaskModel>> getTasksByPatient(@RequestHeader HttpHeaders headers, @PathVariable long idPatient) {
 		try {
-			final UserModel loggedUser = getAuthUser(headers);
-			return new DefaultResponse<>(taskService.findAllByPatient(idPatient, isPatient(loggedUser)));
+			final UserDto loggedUser = getAuthUser(headers);
+			return new DefaultResponse<>(taskService.findAllByPatient(idPatient, loggedUser.isPatient()));
 		} catch (CustomException ex) {
 			return new DefaultResponse<>(ex);
 		}
@@ -103,7 +102,7 @@ public class TaskController extends BaseController {
 	@PostMapping("/{idTask}/start")
 	public DefaultResponse<TaskModel> postTaskStart(@RequestHeader HttpHeaders headers, @PathVariable long idTask) {
 		try {
-			final UserModel loggedUser = getAuthUser(headers);
+			final UserDto loggedUser = getAuthUser(headers);
 			return new DefaultResponse<>(taskService.startTask(idTask, loggedUser));
 		} catch (CustomException ex) {
 			return new DefaultResponse<>(ex);

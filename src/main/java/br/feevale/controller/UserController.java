@@ -1,6 +1,7 @@
 package br.feevale.controller;
 
 import br.feevale.core.DefaultResponse;
+import br.feevale.dtos.UserDto;
 import br.feevale.exceptions.CustomException;
 import br.feevale.model.UserModel;
 import br.feevale.service.UserService;
@@ -24,9 +25,9 @@ public class UserController extends BaseController {
 
 	@ResponseBody
 	@GetMapping()
-	public DefaultResponse<UserModel> getUser(@RequestHeader HttpHeaders headers) {
+	public DefaultResponse<UserDto> getUser(@RequestHeader HttpHeaders headers) {
 		try {
-			final UserModel loggedUser = getAuthUser(headers);
+			final UserDto loggedUser = getAuthUser(headers);
 			return new DefaultResponse<>(loggedUser);
 		} catch (CustomException ex) {
 			return new DefaultResponse<>(ex);
@@ -35,7 +36,7 @@ public class UserController extends BaseController {
 
 	@ResponseBody
 	@PostMapping()
-	public DefaultResponse<UserModel> postUser(@RequestBody UserModel user) {
+	public DefaultResponse<UserDto> postUser(@RequestBody UserModel user) {
 		try {
 			return new DefaultResponse<>(userService.save(user));
 		} catch (CustomException ex) {
@@ -45,7 +46,7 @@ public class UserController extends BaseController {
 
 	@ResponseBody
 	@PatchMapping()
-	public DefaultResponse<UserModel> updateUser(@RequestBody UserModel user) {
+	public DefaultResponse<UserDto> updateUser(@RequestBody UserModel user) {
 		try {
 			return new DefaultResponse<>(userService.save(user));
 		} catch (CustomException ex) {
@@ -55,10 +56,10 @@ public class UserController extends BaseController {
 
 	@ResponseBody
 	@PostMapping("/patient")
-	public DefaultResponse<UserModel> relatePatient(@RequestHeader HttpHeaders headers, @RequestBody UserModel patient) {
+	public DefaultResponse<UserDto> relatePatient(@RequestHeader HttpHeaders headers, @RequestBody UserDto patient) {
 		try {
-			final UserModel loggedUser = getAuthUser(headers);
-			if (isNotPatient(loggedUser)) {
+			final UserDto loggedUser = getAuthUser(headers);
+			if (loggedUser.isNotPatient()) {
 				return new DefaultResponse<>(userService.relatePatient(loggedUser, patient));
 			}
 			throw new CustomException("Operação não permitida para pacientes.");

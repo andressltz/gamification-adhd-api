@@ -1,9 +1,10 @@
-package br.feevale.service;
+package br.feevale.service.impl;
 
 import br.feevale.exceptions.CustomException;
 import br.feevale.model.SessionModel;
 import br.feevale.model.UserModel;
 import br.feevale.repository.SessionRepository;
+import br.feevale.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -14,7 +15,7 @@ import java.util.List;
 import java.util.UUID;
 
 @Component
-public class SessionService {
+public class SessionServiceImpl {
 
 	@Autowired
 	private SessionRepository repository;
@@ -27,7 +28,7 @@ public class SessionService {
 			UserModel userRes = userService.findByEmailAndPassword(userParam.getEmail(), userParam.getPassword());
 			if (userRes != null) {
 				SessionModel userSession = authorize(userRes);
-				userService.cleanUser(userSession.getUser());
+				userSession.getUser().setPassword(null);
 				userSession.setId(null);
 				return userSession;
 			}
@@ -67,7 +68,7 @@ public class SessionService {
 		repository.save(newSession);
 
 		newSession.setId(null);
-		userService.cleanUser(newSession.getUser());
+		newSession.getUser().setPassword(null);
 		return newSession;
 	}
 
