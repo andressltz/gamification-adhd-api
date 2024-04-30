@@ -69,10 +69,12 @@ public class TaskController extends BaseController {
 
 	@ResponseBody
 	@PatchMapping("/{id}")
-	public DefaultResponse<TaskModel> patchUpdate(@PathVariable long id, @RequestBody TaskModel task) {
+	public DefaultResponse<TaskModel> patchUpdate(@RequestHeader HttpHeaders headers, @PathVariable long id, @RequestBody TaskModel taskModel) {
 		try {
-			task.setId(id);
-			return new DefaultResponse<>(taskService.save(task));
+			final UserModel loggedUser = getAuthUser(headers);
+			taskModel.setId(id);
+			taskModel.setOwnerId(loggedUser.getId());
+			return new DefaultResponse<>(taskService.save(taskModel));
 		} catch (CustomException ex) {
 			return new DefaultResponse<>(ex);
 		}
