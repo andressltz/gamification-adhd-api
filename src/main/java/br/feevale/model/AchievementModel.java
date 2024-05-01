@@ -1,6 +1,6 @@
 package br.feevale.model;
 
-import br.feevale.enums.TaskStatus;
+import br.feevale.enums.AchievementStatus;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -18,12 +18,12 @@ import java.util.Date;
 
 @Getter
 @Setter
-@Entity(name = "task")
-public class TaskModel extends DefaultModel {
+@Entity(name = "achievement")
+public class AchievementModel extends DefaultModel {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	@Column(name = "id_task", nullable = false)
+	@Column(name = "id_achievement", nullable = false)
 	private Long id;
 
 	@OneToOne(fetch = FetchType.EAGER)
@@ -36,35 +36,12 @@ public class TaskModel extends DefaultModel {
 	@Column(nullable = false)
 	private String title;
 
-	@Column(nullable = false)
-	private String description;
-
-	private int qtyStars;
-
-	private boolean lostStarDoNotDo;
-
-	private boolean lostStarDelay;
-
-	private boolean hasAchievement;
-
-	@OneToOne(fetch = FetchType.EAGER)
-	@JoinColumn(nullable = false)
-	private AchievementModel achievement;
-
-	@Column(nullable = false)
-	private Date dateToStart;
-
-	@Column(nullable = false)
-	private Date timeToStart;
-
-	private int timeToDo;
-
-	private Date timeStart;
-
-	private Date timeFinish;
+	private Date dateConquered;
 
 	@Enumerated(EnumType.ORDINAL)
 	@Column(nullable = false)
-	private TaskStatus status;
+	private AchievementStatus status;
+
+	private String image;
 
 }

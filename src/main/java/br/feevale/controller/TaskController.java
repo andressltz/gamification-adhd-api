@@ -1,6 +1,7 @@
 package br.feevale.controller;
 
 import br.feevale.core.DefaultResponse;
+import br.feevale.enums.TaskStatus;
 import br.feevale.exceptions.CustomException;
 import br.feevale.model.TaskModel;
 import br.feevale.model.UserModel;
@@ -34,6 +35,7 @@ public class TaskController extends BaseController {
 		try {
 			final UserModel loggedUser = getAuthUser(headers);
 			taskModel.setOwnerId(loggedUser.getId());
+			taskModel.setStatus(TaskStatus.DO_NOT_STARTED);
 			return new DefaultResponse<>(taskService.save(taskModel));
 		} catch (CustomException ex) {
 			return new DefaultResponse<>(ex);
