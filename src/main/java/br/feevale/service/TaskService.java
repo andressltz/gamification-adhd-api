@@ -9,6 +9,7 @@ import br.feevale.utils.UserUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -60,7 +61,7 @@ public class TaskService {
 
 	public List<TaskModel> findAllByPatient(long idPatient, boolean loggedUserIsPatient) {
 		if (loggedUserIsPatient) {
-			return repository.findToPatient(idPatient);
+			return repository.findToPatient(idPatient, new SimpleDateFormat("yyyy-MM-dd").format(new Date()));
 		} else {
 			return repository.findByPatientId(idPatient);
 		}
