@@ -60,4 +60,7 @@ public class AchievementService {
 		}
 	}
 
+	public List<AchievementModel> findAvailableToPatient(long idPatient) {
+		return repository.findAvailableToPatient(idPatient);
+	}
 }

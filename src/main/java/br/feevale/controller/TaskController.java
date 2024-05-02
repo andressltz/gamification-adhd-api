@@ -82,16 +82,6 @@ public class TaskController extends BaseController {
 		}
 	}
 
-//	@ResponseBody
-//	@DeleteMapping("/{id}")
-//	public DefaultResponse<TaskModel> deleteById(@PathVariable long id) {
-//		try {
-//			return new DefaultResponse<>(taskService.deleteById(id));
-//		} catch (CustomException ex) {
-//			return new DefaultResponse<>(ex);
-//		}
-//	}
-
 	@ResponseBody
 	@GetMapping("/user/{idPatient}")
 	public DefaultResponse<List<TaskModel>> getTasksByPatient(@RequestHeader HttpHeaders headers, @PathVariable long idPatient) {

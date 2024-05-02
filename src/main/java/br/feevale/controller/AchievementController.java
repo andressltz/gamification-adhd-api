@@ -83,10 +83,21 @@ public class AchievementController extends BaseController {
 
 	@ResponseBody
 	@GetMapping("/user/{idPatient}")
-	public DefaultResponse<List<AchievementModel>> getTasksByPatient(@RequestHeader HttpHeaders headers, @PathVariable long idPatient) {
+	public DefaultResponse<List<AchievementModel>> getAchievementsByPatient(@RequestHeader HttpHeaders headers, @PathVariable long idPatient) {
 		try {
 			final UserModel loggedUser = getAuthUser(headers);
 			return new DefaultResponse<>(taskService.findAllByPatient(idPatient, UserUtils.isPatient(loggedUser)));
+		} catch (CustomException ex) {
+			return new DefaultResponse<>(ex);
+		}
+	}
+
+	@ResponseBody
+	@GetMapping("/user/{idPatient}/available")
+	public DefaultResponse<List<AchievementModel>> getAchievementsAvailableToPatient(@RequestHeader HttpHeaders headers, @PathVariable long idPatient) {
+		try {
+			final UserModel loggedUser = getAuthUser(headers);
+			return new DefaultResponse<>(taskService.findAvailableToPatient(idPatient));
 		} catch (CustomException ex) {
 			return new DefaultResponse<>(ex);
 		}

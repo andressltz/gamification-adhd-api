@@ -11,6 +11,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToOne;
+import jakarta.persistence.Transient;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -58,6 +59,9 @@ public class TaskModel extends DefaultModel {
 	private Date timeToStart;
 
 	private int timeToDo;
+
+	@Transient
+	private String timeToDoFormated;
 
 	private Date timeStart;
 

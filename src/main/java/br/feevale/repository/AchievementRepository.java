@@ -19,4 +19,9 @@ public interface AchievementRepository extends JpaRepository<AchievementModel, L
 		" WHERE patient_id_user = ?1" +
 		" AND status = ?2")
 	List<AchievementModel> findToPatientConquered(long idPatient, AchievementStatus status);
+
+	@Query(nativeQuery = true, value = "SELECT * " +
+		" FROM achievement" +
+		" WHERE patient_id_user = ?1")
+	List<AchievementModel> findAvailableToPatient(long idPatient);
 }

@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.text.SimpleDateFormat;
+import java.time.Duration;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -60,10 +61,33 @@ public class TaskService {
 //	}
 
 	public List<TaskModel> findAllByPatient(long idPatient, boolean loggedUserIsPatient) {
+		List<TaskModel> listTasks;
 		if (loggedUserIsPatient) {
 			return repository.findToPatient(idPatient, new SimpleDateFormat("yyyy-MM-dd").format(new Date()));
 		} else {
-			return repository.findByPatientId(idPatient);
+			listTasks = repository.findByPatientId(idPatient);
+			for (TaskModel task : listTasks) {
+				task.setPatient(null);
+				task.getAchievement().setPatient(null);
+				if (task.getDateToStart().after(new Date())) {
+					task.setStatus(TaskStatus.BLOCKED);
+				}
+				if (task.getTimeToDo() > 0) {
+					Duration duration = Duration.ofMinutes(task.getTimeToDo());
+					StringBuilder formattedDuration = new StringBuilder();
+					int hours = duration.toHoursPart();
+					int minutes = duration.toMinutesPart();
+					if (hours > 0) {
+						formattedDuration.append(hours).append("h ");
+					}
+					if (minutes > 0) {
+						formattedDuration.append(minutes).append("min");
+					}
+					task.setTimeToDoFormated(formattedDuration.toString());
+				}
+
+			}
+			return listTasks;
 		}
 	}
 
