@@ -48,9 +48,8 @@ public class TaskModel extends DefaultModel {
 
 	private boolean hasAchievement;
 
-	@OneToOne(fetch = FetchType.EAGER)
-	@JoinColumn(nullable = false)
-	private AchievementModel achievement;
+	@Column(nullable = false, name = "achievement_id_achievement")
+	private Long achievementId;
 
 	@Column(nullable = false)
 	private Date dateToStart;

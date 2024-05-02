@@ -9,7 +9,6 @@ import br.feevale.utils.UserUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.text.SimpleDateFormat;
 import java.time.Duration;
 import java.util.Date;
 import java.util.List;
@@ -63,12 +62,11 @@ public class TaskService {
 	public List<TaskModel> findAllByPatient(long idPatient, boolean loggedUserIsPatient) {
 		List<TaskModel> listTasks;
 		if (loggedUserIsPatient) {
-			return repository.findToPatient(idPatient, new SimpleDateFormat("yyyy-MM-dd").format(new Date()));
+			return repository.findToPatient(idPatient);
 		} else {
 			listTasks = repository.findByPatientId(idPatient);
 			for (TaskModel task : listTasks) {
 				task.setPatient(null);
-				task.getAchievement().setPatient(null);
 				if (task.getDateToStart().after(new Date())) {
 					task.setStatus(TaskStatus.BLOCKED);
 				}

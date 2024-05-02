@@ -42,7 +42,7 @@ public class AchievementService {
 		Optional<AchievementModel> model = repository.findById(achievementId);
 		if (model.isPresent()) {
 			if (UserUtils.isPatient(loggedUser)) {
-				if (model.get().getPatient().getId().equals(loggedUser.getId())) {
+				if (model.get().getPatientId().equals(loggedUser.getId())) {
 					return model.get();
 				}
 			} else {
@@ -54,7 +54,7 @@ public class AchievementService {
 
 	public List<AchievementModel> findAllByPatient(long idPatient, boolean loggedUserIsPatient) {
 		if (loggedUserIsPatient) {
-			return repository.findToPatientConquered(idPatient, AchievementStatus.CONQUERED);
+			return repository.findToPatientConquered(idPatient, AchievementStatus.CONQUERED.getOrdinal());
 		} else {
 			return repository.findByPatientId(idPatient);
 		}
