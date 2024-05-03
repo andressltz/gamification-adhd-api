@@ -20,6 +20,9 @@ public class TaskService {
 	@Autowired
 	private TaskRepository repository;
 
+	@Autowired
+	private AchievementService achievementService;
+
 	public TaskModel save(TaskModel task) {
 		if (task.getId() == null) {
 			return saveNew(task);
@@ -54,15 +57,17 @@ public class TaskService {
 		throw new CustomException("Tarefa não localizada");
 	}
 
-//	public TaskModel deleteById(long id) {
-//		// Todo implement
-//		return null;
-//	}
-
 	public List<TaskModel> findAllByPatient(long idPatient, boolean loggedUserIsPatient) {
 		List<TaskModel> listTasks;
 		if (loggedUserIsPatient) {
-			return repository.findToPatient(idPatient);
+			listTasks = repository.findToPatient(idPatient);
+			for (TaskModel task : listTasks) {
+				task.setPatient(null);
+				task.setTimeToDoFormated(getDurationFormatted(task.getTimeToDo()));
+				if (task.isHasAchievement() && task.getAchievementId() != null) {
+					task.setAchievement(achievementService.findByIdWithoutValidation(task.getAchievementId()));
+				}
+			}
 		} else {
 			listTasks = repository.findByPatientId(idPatient);
 			for (TaskModel task : listTasks) {
@@ -70,23 +75,10 @@ public class TaskService {
 				if (task.getDateToStart().after(new Date())) {
 					task.setStatus(TaskStatus.BLOCKED);
 				}
-				if (task.getTimeToDo() > 0) {
-					Duration duration = Duration.ofMinutes(task.getTimeToDo());
-					StringBuilder formattedDuration = new StringBuilder();
-					int hours = duration.toHoursPart();
-					int minutes = duration.toMinutesPart();
-					if (hours > 0) {
-						formattedDuration.append(hours).append("h ");
-					}
-					if (minutes > 0) {
-						formattedDuration.append(minutes).append("min");
-					}
-					task.setTimeToDoFormated(formattedDuration.toString());
-				}
-
+				task.setTimeToDoFormated(getDurationFormatted(task.getTimeToDo()));
 			}
-			return listTasks;
 		}
+		return listTasks;
 	}
 
 	public TaskModel startTask(long idTask, UserModel loggedUser) {
@@ -118,5 +110,22 @@ public class TaskService {
 		task = repository.save(task);
 		task.setPatient(null);
 		return task;
+	}
+
+	private String getDurationFormatted(int timeToDo) {
+		if (timeToDo > 0) {
+			Duration duration = Duration.ofMinutes(timeToDo);
+			StringBuilder formattedDuration = new StringBuilder();
+			int hours = duration.toHoursPart();
+			int minutes = duration.toMinutesPart();
+			if (hours > 0) {
+				formattedDuration.append(hours).append("h ");
+			}
+			if (minutes > 0) {
+				formattedDuration.append(minutes).append("min");
+			}
+			return formattedDuration.toString();
+		}
+		return null;
 	}
 }

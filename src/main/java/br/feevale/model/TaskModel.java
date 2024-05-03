@@ -51,6 +51,9 @@ public class TaskModel extends DefaultModel {
 	@Column(nullable = false, name = "achievement_id_achievement")
 	private Long achievementId;
 
+	@Transient
+	private AchievementModel achievement;
+
 	@Column(nullable = false)
 	private Date dateToStart;
 

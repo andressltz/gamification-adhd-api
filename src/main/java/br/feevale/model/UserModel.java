@@ -1,5 +1,6 @@
 package br.feevale.model;
 
+import br.feevale.enums.Gender;
 import br.feevale.enums.UserType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -37,6 +38,10 @@ public class UserModel extends DefaultModel {
 	private String image;
 
 	private String phone;
+
+	@Enumerated(EnumType.ORDINAL)
+	@Column(nullable = true)
+	private Gender gender;
 
 	@Enumerated(EnumType.ORDINAL)
 	@Column(nullable = false)

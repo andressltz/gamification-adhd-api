@@ -52,6 +52,11 @@ public class AchievementService {
 		throw new CustomException("Conquista não localizada");
 	}
 
+	public AchievementModel findByIdWithoutValidation(long achievementId) {
+		Optional<AchievementModel> model = repository.findById(achievementId);
+		return model.orElse(null);
+	}
+
 	public List<AchievementModel> findAllByPatient(long idPatient, boolean loggedUserIsPatient) {
 		if (loggedUserIsPatient) {
 			return repository.findToPatientConquered(idPatient, AchievementStatus.CONQUERED.getOrdinal());

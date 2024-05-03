@@ -1,6 +1,7 @@
 package br.feevale.controller;
 
 import br.feevale.core.DefaultResponse;
+import br.feevale.enums.Gender;
 import br.feevale.exceptions.CustomException;
 import br.feevale.model.UserModel;
 import br.feevale.service.UserService;
@@ -38,6 +39,9 @@ public class UserController extends BaseController {
 	@PostMapping()
 	public DefaultResponse<UserModel> postUser(@RequestBody UserModel user) {
 		try {
+			if (user.getGender() == null) {
+				user.setGender(Gender.NOT_SELECTED);
+			}
 			return new DefaultResponse<>(userService.save(user));
 		} catch (CustomException ex) {
 			return new DefaultResponse<>(ex);
