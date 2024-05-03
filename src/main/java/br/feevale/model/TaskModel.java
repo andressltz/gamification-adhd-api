@@ -48,7 +48,7 @@ public class TaskModel extends DefaultModel {
 
 	private boolean hasAchievement;
 
-	@Column(nullable = false, name = "achievement_id_achievement")
+	@Column(name = "achievement_id_achievement")
 	private Long achievementId;
 
 	@Transient

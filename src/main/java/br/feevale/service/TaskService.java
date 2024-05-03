@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.time.Duration;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -61,13 +62,18 @@ public class TaskService {
 		List<TaskModel> listTasks;
 		if (loggedUserIsPatient) {
 			listTasks = repository.findToPatient(idPatient);
+			List<TaskModel> newListTasks = new ArrayList<>();
 			for (TaskModel task : listTasks) {
-				task.setPatient(null);
-				task.setTimeToDoFormated(getDurationFormatted(task.getTimeToDo()));
-				if (task.isHasAchievement() && task.getAchievementId() != null) {
-					task.setAchievement(achievementService.findByIdWithoutValidation(task.getAchievementId()));
+				if (!task.getDateToStart().after(new Date())) {
+					task.setPatient(null);
+					task.setTimeToDoFormated(getDurationFormatted(task.getTimeToDo()));
+					if (task.isHasAchievement() && task.getAchievementId() != null) {
+						task.setAchievement(achievementService.findByIdWithoutValidation(task.getAchievementId()));
+					}
+					newListTasks.add(task);
 				}
 			}
+			return newListTasks;
 		} else {
 			listTasks = repository.findByPatientId(idPatient);
 			for (TaskModel task : listTasks) {
