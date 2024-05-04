@@ -24,6 +24,9 @@ public class TaskService {
 	@Autowired
 	private AchievementService achievementService;
 
+	@Autowired
+	private UserService userService;
+
 	public TaskModel save(TaskModel task) {
 		if (task.getId() == null) {
 			return saveNew(task);
@@ -50,6 +53,24 @@ public class TaskService {
 			if (UserUtils.isPatient(loggedUser)) {
 				if (task.get().getPatient().getId().equals(loggedUser.getId())) {
 					return task.get();
+				}
+			} else {
+				return task.get();
+			}
+		}
+		throw new CustomException("Tarefa não localizada");
+	}
+
+	public TaskModel findByIdWithAchievement(long taskId, UserModel loggedUser) {
+		Optional<TaskModel> task = repository.findById(taskId);
+		if (task.isPresent()) {
+			if (UserUtils.isPatient(loggedUser)) {
+				if (task.get().getPatient().getId().equals(loggedUser.getId())) {
+					TaskModel model = task.get();
+					if (model.isHasAchievement() && model.getAchievementId() != null) {
+						model.setAchievement(achievementService.findByIdWithoutValidation(model.getAchievementId()));
+					}
+					return model;
 				}
 			} else {
 				return task.get();
@@ -110,12 +131,41 @@ public class TaskService {
 
 	public TaskModel finishTask(long idTask, UserModel loggedUser) {
 		TaskModel task = findById(idTask, loggedUser);
-		task.setStatus(TaskStatus.FINISHED);
-		task.setTimeFinish(new Date());
-		task.setDtUpdate(new Date());
-		task = repository.save(task);
+		
+		if (task.getTimeFinish() == null) {
+			task.setStatus(TaskStatus.FINISHED);
+			task.setTimeFinish(new Date());
+			task.setDtUpdate(new Date());
+			task = repository.save(task);
+
+			achievementService.setConquered(task.isHasAchievement(), task.getAchievementId());
+			setUserStars(task);
+			setUserLevel(task);
+		} else {
+			task.setStatus(TaskStatus.FINISHED);
+			task.setDtUpdate(new Date());
+			task = repository.save(task);
+		}
+
 		task.setPatient(null);
 		return task;
+	}
+
+	private void setUserLevel(TaskModel task) {
+
+	}
+
+	private void setUserStars(TaskModel task) {
+//		private boolean lostStarDoNotDo;
+		if (task.isLostStarDelay()) {
+//			if (task.getTimeToDo() > 0 && task.getCurrentDuration() != null && task.getCurrentDuration() > task.getTimeToDo()) {
+//				userService.lostStars(task.getPatient(), task.getQtyStars());
+//			} else {
+//				userService.addStars(task.getPatient(), task.getQtyStars());
+//			}
+		} else {
+			userService.addStars(task.getPatient(), task.getQtyStars());
+		}
 	}
 
 	private String getDurationFormatted(int timeToDo) {

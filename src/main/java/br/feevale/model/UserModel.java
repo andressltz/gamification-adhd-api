@@ -53,4 +53,7 @@ public class UserModel extends DefaultModel {
 	@Transient
 	private String phoneFormated;
 
+	@Column
+	private Integer qtyStars;
+
 }

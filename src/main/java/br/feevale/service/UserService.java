@@ -149,4 +149,13 @@ public class UserService {
 		}
 		throw new CustomException("Não foi possível vincular o paciente.");
 	}
+
+	public void addStars(UserModel patient, int qtyStars) {
+		if (patient != null && patient.getId() != null && qtyStars > 0) {
+			int currentStars = patient.getQtyStars() != null ? patient.getQtyStars() : 0;
+			currentStars = currentStars + qtyStars;
+			patient.setQtyStars(currentStars);
+			repository.save(patient);
+		}
+	}
 }

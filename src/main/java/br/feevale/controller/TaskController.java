@@ -61,7 +61,7 @@ public class TaskController extends BaseController {
 	public DefaultResponse<TaskModel> getById(@RequestHeader HttpHeaders headers, @PathVariable long idTask) {
 		try {
 			final UserModel loggedUser = getAuthUser(headers);
-			TaskModel taskModel = taskService.findById(idTask, loggedUser);
+			TaskModel taskModel = taskService.findByIdWithAchievement(idTask, loggedUser);
 			taskModel.setPatient(null);
 			return new DefaultResponse<>(taskModel);
 		} catch (CustomException ex) {
@@ -70,11 +70,11 @@ public class TaskController extends BaseController {
 	}
 
 	@ResponseBody
-	@PatchMapping("/{id}")
-	public DefaultResponse<TaskModel> patchUpdate(@RequestHeader HttpHeaders headers, @PathVariable long id, @RequestBody TaskModel taskModel) {
+	@PatchMapping("/{idTask}")
+	public DefaultResponse<TaskModel> patchUpdate(@RequestHeader HttpHeaders headers, @PathVariable long idTask, @RequestBody TaskModel taskModel) {
 		try {
 			final UserModel loggedUser = getAuthUser(headers);
-			taskModel.setId(id);
+			taskModel.setId(idTask);
 			taskModel.setOwnerId(loggedUser.getId());
 			return new DefaultResponse<>(taskService.save(taskModel));
 		} catch (CustomException ex) {

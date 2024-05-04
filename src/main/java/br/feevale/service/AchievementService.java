@@ -68,4 +68,12 @@ public class AchievementService {
 	public List<AchievementModel> findAvailableToPatient(long idPatient) {
 		return repository.findAvailableToPatient(idPatient);
 	}
+
+	public void setConquered(boolean hasAchievement, Long achievementId) {
+		if (hasAchievement && achievementId != null) {
+			AchievementModel model = findByIdWithoutValidation(achievementId);
+			model.setStatus(AchievementStatus.CONQUERED);
+			save(model);
+		}
+	}
 }
