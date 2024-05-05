@@ -56,4 +56,7 @@ public class UserModel extends DefaultModel {
 	@Column
 	private Integer qtyStars;
 
+	@Column(nullable = false)
+	private Integer level;
+
 }

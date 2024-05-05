@@ -39,9 +39,6 @@ public class UserController extends BaseController {
 	@PostMapping()
 	public DefaultResponse<UserModel> postUser(@RequestBody UserModel user) {
 		try {
-			if (user.getGender() == null) {
-				user.setGender(Gender.NOT_SELECTED);
-			}
 			return new DefaultResponse<>(userService.save(user));
 		} catch (CustomException ex) {
 			return new DefaultResponse<>(ex);

@@ -1,5 +1,6 @@
 package br.feevale.service;
 
+import br.feevale.enums.Gender;
 import br.feevale.enums.UserType;
 import br.feevale.exceptions.CustomException;
 import br.feevale.model.UserModel;
@@ -31,6 +32,16 @@ public class UserService {
 	private UserRepository repository;
 
 	public UserModel save(UserModel user) {
+		if (user.getGender() == null) {
+			user.setGender(Gender.NOT_SELECTED);
+		}
+		if (user.getQtyStars() == null) {
+			user.setQtyStars(0);
+		}
+		if (user.getLevel() == null) {
+			user.setLevel(1);
+		}
+
 		if (user.getId() == null) {
 			return saveNewUser(user);
 		} else {
@@ -150,12 +161,9 @@ public class UserService {
 		throw new CustomException("Não foi possível vincular o paciente.");
 	}
 
-	public void addStars(UserModel patient, int qtyStars) {
-		if (patient != null && patient.getId() != null && qtyStars > 0) {
-			int currentStars = patient.getQtyStars() != null ? patient.getQtyStars() : 0;
-			currentStars = currentStars + qtyStars;
-			patient.setQtyStars(currentStars);
-			repository.save(patient);
-		}
+	public int sumStars(UserModel patient, int qtyStars) {
+		int currentStars = patient.getQtyStars() != null ? patient.getQtyStars() : 0;
+		currentStars = currentStars + qtyStars;
+		return currentStars;
 	}
 }
