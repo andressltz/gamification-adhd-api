@@ -65,12 +65,14 @@ public class TaskModel extends DefaultModel {
 	@Transient
 	private String timeToDoFormated;
 
-	private Integer currentDuration;
+	private Long currentDuration;
 
 	@Transient
 	private String currentDurationFormated;
 
 	private Date timeStart;
+
+	private Date timePlay;
 
 	private Date timeFinish;
 

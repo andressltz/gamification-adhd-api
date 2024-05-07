@@ -15,6 +15,7 @@ import java.nio.charset.StandardCharsets;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.KeySpec;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.Date;
@@ -31,7 +32,7 @@ public class UserService {
 	@Autowired
 	private UserRepository repository;
 
-	public UserModel save(UserModel user) {
+	public UserModel save(UserModel user, boolean validatePass, boolean validateEmail) {
 		if (user.getGender() == null) {
 			user.setGender(Gender.NOT_SELECTED);
 		}
@@ -45,7 +46,7 @@ public class UserService {
 		if (user.getId() == null) {
 			return saveNewUser(user);
 		} else {
-			return update(user);
+			return update(user, validatePass, validateEmail);
 		}
 	}
 
@@ -54,7 +55,7 @@ public class UserService {
 	}
 
 	private UserModel saveNewUser(UserModel user) {
-		validateUser(user);
+		validateUser(user, true, true);
 		user.setEmail(user.getEmail().toLowerCase().trim());
 		user.setPassword(encryptPassword(user.getPassword().trim()));
 
@@ -65,8 +66,8 @@ public class UserService {
 		return user;
 	}
 
-	private UserModel update(UserModel user) {
-		validateUser(user);
+	private UserModel update(UserModel user, boolean validatePass, boolean validateEmail) {
+		validateUser(user, validatePass, validateEmail);
 		user.setDtUpdate(new Date());
 		user = repository.save(user);
 		cleanUser(user);
@@ -86,12 +87,12 @@ public class UserService {
 		}
 	}
 
-	private void validateUser(@NotNull UserModel user) throws CustomException {
+	private void validateUser(@NotNull UserModel user, boolean validatePass, boolean validateEmail) throws CustomException {
 		if (user.getEmail() == null || !user.getEmail().trim().matches(REGEX_EMAIL)) {
 			throw new CustomException("E-mail inválido.");
 		}
 
-		if (user.getPassword() == null || !user.getPassword().trim().matches(REGEX_PASSWORD)) {
+		if (validatePass && (user.getPassword() == null || !user.getPassword().trim().matches(REGEX_PASSWORD))) {
 			throw new CustomException("Senha inválida. A senha deve conter entre 6 e 10 caracteres.");
 		}
 
@@ -103,7 +104,7 @@ public class UserService {
 			throw new CustomException("Tipo de usuário não informado.");
 		}
 
-		if (repository.findByEmail(user.getEmail().toLowerCase().trim()) != null) {
+		if (validateEmail && repository.findByEmail(user.getEmail().toLowerCase().trim()) != null) {
 			throw new CustomException("E-mail já cadastrado.");
 		}
 
@@ -117,6 +118,7 @@ public class UserService {
 		if (userModel.getPhone() != null) {
 			userModel.setPhoneFormated(userModel.getPhone().replaceFirst("(\\d{2})(\\d{5})(\\d+)", "($1) $2-$3"));
 		}
+		userModel.setTotalDurationFormatted(getDurationFormatted(userModel.getTotalDuration()));
 		return userModel;
 	}
 
@@ -161,9 +163,27 @@ public class UserService {
 		throw new CustomException("Não foi possível vincular o paciente.");
 	}
 
-	public int sumStars(UserModel patient, int qtyStars) {
-		int currentStars = patient.getQtyStars() != null ? patient.getQtyStars() : 0;
+	public int sumStars(Integer patientQtyStars, int qtyStars) {
+		int currentStars = patientQtyStars != null ? patientQtyStars : 0;
 		currentStars = currentStars + qtyStars;
 		return currentStars;
+	}
+
+	public int lostStars(Integer patientQtyStars, int qtyStars) {
+		int currentStars = patientQtyStars != null ? patientQtyStars : 0;
+		currentStars = Math.max(currentStars - qtyStars, 0);
+		return currentStars;
+	}
+
+	private String getDurationFormatted(Long totalDuration) {
+		if (totalDuration != null) {
+			Duration duration = Duration.ofMinutes(totalDuration);
+			StringBuilder formattedDuration = new StringBuilder();
+			int hours = duration.toHoursPart();
+			int minutes = duration.toMinutesPart();
+			formattedDuration.append(hours).append(":").append(minutes);
+			return formattedDuration.toString();
+		}
+		return null;
 	}
 }

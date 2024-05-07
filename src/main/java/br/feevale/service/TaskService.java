@@ -115,9 +115,34 @@ public class TaskService {
 		TaskModel task = findById(idTask, loggedUser);
 		if (!TaskStatus.DOING.equals(task.getStatus())) {
 			task.setStatus(TaskStatus.DOING);
-			task.setTimeStart(new Date());
+			task.setTimeStart(task.getTimeToStart() == null ? new Date() : task.getTimeToStart());
+			task.setTimePlay(task.getTimePlay() == null ? new Date() : task.getTimePlay());
+			task.setCurrentDuration(task.getCurrentDuration() == null ? 0L : task.getCurrentDuration());
 		}
 		task.setDtUpdate(new Date());
+		task = repository.save(task);
+		task.setPatient(null);
+		return task;
+	}
+
+	public TaskModel playTask(long idTask, UserModel loggedUser) {
+		TaskModel task = findById(idTask, loggedUser);
+		task.setStatus(TaskStatus.DOING);
+		task.setTimePlay(new Date());
+		task.setDtUpdate(new Date());
+
+		task = repository.save(task);
+		task.setPatient(null);
+		return task;
+	}
+
+	public TaskModel pauseTask(long idTask, UserModel loggedUser) {
+		TaskModel task = findById(idTask, loggedUser);
+		task.setStatus(TaskStatus.PAUSED);
+		task.setCurrentDuration(calculateDuration(task));
+		task.setTimePlay(null);
+		task.setDtUpdate(new Date());
+
 		task = repository.save(task);
 		task.setPatient(null);
 		return task;
@@ -126,7 +151,10 @@ public class TaskService {
 	public TaskModel stopTask(long idTask, UserModel loggedUser) {
 		TaskModel task = findById(idTask, loggedUser);
 		task.setStatus(TaskStatus.PAUSED);
+		task.setCurrentDuration(calculateDuration(task));
+		task.setTimePlay(null);
 		task.setDtUpdate(new Date());
+
 		task = repository.save(task);
 		task.setPatient(null);
 		return task;
@@ -135,20 +163,27 @@ public class TaskService {
 	public TaskModel finishTask(long idTask, UserModel loggedUser) {
 		TaskModel task = findById(idTask, loggedUser);
 
+		task.setStatus(TaskStatus.FINISHED);
+		task.setDtUpdate(new Date());
+
 		if (task.getTimeFinish() == null) {
-			task.setStatus(TaskStatus.FINISHED);
 			task.setTimeFinish(new Date());
-			task.setDtUpdate(new Date());
+			task.setCurrentDuration(calculateDuration(task));
+			task.setTimePlay(null);
 			task = repository.save(task);
 
 			achievementService.setConquered(task.isHasAchievement(), task.getAchievementId());
-			if (task.getPatient() != null && task.getPatient().getId() != null && task.getQtyStars() > 0) {
-				UserModel patientModel = levelService.calculateStars(task.isLostStarDelay(), task.isLostStarDoNotDo(), task.getQtyStars(), task.getPatient());
-				levelService.setUserLevel(patientModel);
+			if (task.getPatient() != null && task.getPatient().getId() != null) {
+				UserModel patientModel = task.getPatient();
+				if (task.getQtyStars() > 0) {
+					levelService.calculateStars(task.isLostStarDelay(), task.isLostStarDoNotDo(), task.getQtyStars(), patientModel, task.getTimeToDo(), task.getCurrentDuration());
+					levelService.setUserLevel(patientModel);
+				}
+				patientModel.setTotalDuration(patientModel.getTotalDuration() == null ? task.getCurrentDuration() : patientModel.getTotalDuration() + task.getCurrentDuration());
+
+				userService.save(patientModel, false, false);
 			}
 		} else {
-			task.setStatus(TaskStatus.FINISHED);
-			task.setDtUpdate(new Date());
 			task = repository.save(task);
 		}
 
@@ -171,5 +206,19 @@ public class TaskService {
 			return formattedDuration.toString();
 		}
 		return null;
+	}
+
+	private Long calculateDuration(TaskModel task) {
+		if (task.getTimeStart() != null && task.getCurrentDuration() == null) {
+			Duration duration = Duration.between(task.getTimeStart().toInstant(), new Date().toInstant());
+			return duration.toMinutes();
+		} else if (task.getTimePlay() != null && task.getCurrentDuration() != null) {
+			Duration currentDuration = Duration.between(task.getTimePlay().toInstant(), new Date().toInstant());
+			return currentDuration.toMinutes() + task.getCurrentDuration();
+
+		} else if (task.getTimePlay() == null && task.getCurrentDuration() != null) {
+			return task.getCurrentDuration();
+		}
+		return 0L;
 	}
 }

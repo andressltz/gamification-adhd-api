@@ -1,7 +1,6 @@
 package br.feevale.controller;
 
 import br.feevale.core.DefaultResponse;
-import br.feevale.enums.Gender;
 import br.feevale.exceptions.CustomException;
 import br.feevale.model.UserModel;
 import br.feevale.service.UserService;
@@ -29,6 +28,7 @@ public class UserController extends BaseController {
 	public DefaultResponse<UserModel> getUser(@RequestHeader HttpHeaders headers) {
 		try {
 			final UserModel loggedUser = getAuthUser(headers);
+			loggedUser.setPassword(null);
 			return new DefaultResponse<>(loggedUser);
 		} catch (CustomException ex) {
 			return new DefaultResponse<>(ex);
@@ -39,7 +39,7 @@ public class UserController extends BaseController {
 	@PostMapping()
 	public DefaultResponse<UserModel> postUser(@RequestBody UserModel user) {
 		try {
-			return new DefaultResponse<>(userService.save(user));
+			return new DefaultResponse<>(userService.save(user, true, true));
 		} catch (CustomException ex) {
 			return new DefaultResponse<>(ex);
 		}
@@ -49,7 +49,7 @@ public class UserController extends BaseController {
 	@PatchMapping()
 	public DefaultResponse<UserModel> updateUser(@RequestBody UserModel user) {
 		try {
-			return new DefaultResponse<>(userService.save(user));
+			return new DefaultResponse<>(userService.save(user, true, true));
 		} catch (CustomException ex) {
 			return new DefaultResponse<>(ex);
 		}

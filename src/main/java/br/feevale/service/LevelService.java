@@ -1,6 +1,5 @@
 package br.feevale.service;
 
-import br.feevale.model.TaskModel;
 import br.feevale.model.UserModel;
 import br.feevale.repository.TaskRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,7 +22,7 @@ public class LevelService {
 	private UserService userService;
 
 	public void setUserLevel(UserModel patient) {
-		int currentLevel = patient.getLevel();
+		int currentLevel = patient.getLevel() == null ? 1 : patient.getLevel();
 		if (currentLevel != MAX_LEVEL) {
 			int currentStars = patient.getQtyStars();
 
@@ -35,18 +34,17 @@ public class LevelService {
 		}
 	}
 
-	public UserModel calculateStars(boolean lostStarDelay, boolean lostStarDoNotDo, int qtyStarsTask, UserModel pacient) {
-		if (lostStarDelay) {
-//			if (task.getTimeToDo() > 0 && task.getCurrentDuration() != null && task.getCurrentDuration() > task.getTimeToDo()) {
-//				userService.lostStars(task.getPatient(), task.getQtyStars());
-//			} else {
-//				userService.addStars(task.getPatient(), task.getQtyStars());
-//			}
+	public void calculateStars(boolean lostStarDelay, boolean lostStarDoNotDo, int qtyStarsTask, UserModel pacient, int taskTimeToDo, Long taskCurrentDuration) {
+		if (lostStarDoNotDo) {
+			//
+		}
+		if (lostStarDelay && taskTimeToDo > 0 && taskCurrentDuration != null && taskCurrentDuration > taskTimeToDo) {
+			int totalStarts = userService.lostStars(pacient.getQtyStars(), qtyStarsTask);
+			pacient.setQtyStars(totalStarts);
 		} else {
-			int totalStarts = userService.sumStars(pacient, qtyStarsTask);
+			int totalStarts = userService.sumStars(pacient.getQtyStars(), qtyStarsTask);
 			pacient.setQtyStars(totalStarts);
 		}
-		return pacient;
 	}
 
 }

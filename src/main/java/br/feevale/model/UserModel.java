@@ -56,7 +56,13 @@ public class UserModel extends DefaultModel {
 	@Column
 	private Integer qtyStars;
 
-	@Column(nullable = false)
+	@Column
+	private Long totalDuration;
+
+	@Transient
+	private String totalDurationFormatted;
+
+	@Column(nullable = true)
 	private Integer level;
 
 }

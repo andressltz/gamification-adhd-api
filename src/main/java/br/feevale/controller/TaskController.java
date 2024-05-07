@@ -105,6 +105,28 @@ public class TaskController extends BaseController {
 	}
 
 	@ResponseBody
+	@PostMapping("/{idTask}/play")
+	public DefaultResponse<TaskModel> postTaskPlay(@RequestHeader HttpHeaders headers, @PathVariable long idTask) {
+		try {
+			final UserModel loggedUser = getAuthUser(headers);
+			return new DefaultResponse<>(taskService.playTask(idTask, loggedUser));
+		} catch (CustomException ex) {
+			return new DefaultResponse<>(ex);
+		}
+	}
+
+	@ResponseBody
+	@PostMapping("/{idTask}/pause")
+	public DefaultResponse<TaskModel> postTaskPause(@RequestHeader HttpHeaders headers, @PathVariable long idTask) {
+		try {
+			final UserModel loggedUser = getAuthUser(headers);
+			return new DefaultResponse<>(taskService.pauseTask(idTask, loggedUser));
+		} catch (CustomException ex) {
+			return new DefaultResponse<>(ex);
+		}
+	}
+
+	@ResponseBody
 	@PostMapping("/{idTask}/stop")
 	public DefaultResponse<TaskModel> postTaskStop(@RequestHeader HttpHeaders headers, @PathVariable long idTask) {
 		try {
