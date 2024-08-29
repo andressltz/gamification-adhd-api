@@ -22,11 +22,11 @@ public class LevelService {
 	private UserService userService;
 
 	public void setUserLevel(UserModel patient) {
-		int currentLevel = patient.getLevel() == null ? 1 : patient.getLevel();
+		int currentLevel = patient.getLevel() == null || patient.getLevel() < 1 ? 1 : patient.getLevel();
 		if (currentLevel != MAX_LEVEL) {
 			int currentStars = patient.getQtyStars();
 
-			int needStarsNextLevel = currentLevel * STARS_TO_NEXT_LEVEL;
+			int needStarsNextLevel = getMaxStarsToThisLevel(currentLevel);
 			if (currentStars >= needStarsNextLevel) {
 				currentLevel = currentLevel + 1;
 				patient.setLevel(currentLevel);
@@ -47,4 +47,15 @@ public class LevelService {
 		}
 	}
 
+	public void setMaxLevelAndMaxStars(UserModel user) {
+		user.setMaxLevel(MAX_LEVEL);
+		user.setMaxStars(getMaxStarsToThisLevel(user.getLevel()));
+	}
+
+	private int getMaxStarsToThisLevel(Integer currentLevel) {
+		if (currentLevel == null || currentLevel < 1) {
+			currentLevel = 1;
+		}
+		return currentLevel * STARS_TO_NEXT_LEVEL;
+	}
 }

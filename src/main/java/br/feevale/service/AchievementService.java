@@ -20,10 +20,20 @@ public class AchievementService {
 	private AchievementRepository repository;
 
 	public AchievementModel save(AchievementModel model) {
+		validateAchievement(model);
 		if (model.getId() == null) {
 			return saveNew(model);
 		} else {
 			return update(model);
+		}
+	}
+
+	private void validateAchievement(final AchievementModel achievement) {
+		if (achievement.getTitle() == null || achievement.getTitle().trim().equals("")) {
+			throw new CustomException("Título inválido.");
+		}
+		if (achievement.getImage() == null || achievement.getImage().trim().equals("")) {
+			achievement.setImage("ant_dstar_dBLUE");
 		}
 	}
 

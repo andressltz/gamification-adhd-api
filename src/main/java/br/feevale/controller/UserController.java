@@ -3,6 +3,7 @@ package br.feevale.controller;
 import br.feevale.core.DefaultResponse;
 import br.feevale.exceptions.CustomException;
 import br.feevale.model.UserModel;
+import br.feevale.service.LevelService;
 import br.feevale.service.UserService;
 import br.feevale.utils.UserUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,12 +24,25 @@ public class UserController extends BaseController {
 	@Autowired
 	private UserService userService;
 
+	@Autowired
+	private LevelService levelService;
+
 	@ResponseBody
 	@GetMapping()
 	public DefaultResponse<UserModel> getUser(@RequestHeader HttpHeaders headers) {
 		try {
 			final UserModel loggedUser = getAuthUser(headers);
 			loggedUser.setPassword(null);
+			if (UserUtils.isPatient(loggedUser)) {
+				levelService.setMaxLevelAndMaxStars(loggedUser);
+				return new DefaultResponse<>(loggedUser);
+			} else if (loggedUser.getPatients() != null && !loggedUser.getPatients().isEmpty()) {
+				loggedUser.getPatients().forEach(pat -> {
+					userService.cleanUser(pat);
+					levelService.setMaxLevelAndMaxStars(pat);
+				});
+				return new DefaultResponse<>(loggedUser);
+			}
 			return new DefaultResponse<>(loggedUser);
 		} catch (CustomException ex) {
 			return new DefaultResponse<>(ex);

@@ -65,4 +65,10 @@ public class UserModel extends DefaultModel {
 	@Column(nullable = true)
 	private Integer level;
 
+	@Transient
+	private Integer maxLevel;
+
+	@Transient
+	private Integer maxStars;
+
 }

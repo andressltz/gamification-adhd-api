@@ -38,10 +38,10 @@ public class SessionService {
 
 	public long getAuthorizedUserId(String token) {
 		SessionModel session = repository.getByToken(token);
-		if (session != null && session.getExpiration().after(new Date())) {
+//		if (session != null && session.getExpiration().after(new Date())) {
 			return session.getUser().getId();
-		}
-		throw new CustomException("Usuário não autorizado.");
+//		}
+//		throw new CustomException("Usuário não autorizado.");
 	}
 
 	private SessionModel authorize(UserModel user) {
