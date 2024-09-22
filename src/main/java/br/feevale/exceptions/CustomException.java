@@ -6,4 +6,7 @@ public class CustomException extends RuntimeException {
 		super(error);
 	}
 
+	public CustomException(String error, Throwable cause) {
+		super(error, cause);
+	}
 }

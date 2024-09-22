@@ -3,6 +3,7 @@ package br.feevale.controller;
 import br.feevale.core.DefaultResponse;
 import br.feevale.enums.AchievementStatus;
 import br.feevale.exceptions.CustomException;
+import br.feevale.exceptions.UnauthorizedException;
 import br.feevale.model.AchievementModel;
 import br.feevale.model.UserModel;
 import br.feevale.service.AchievementService;
@@ -38,6 +39,10 @@ public class AchievementController extends BaseController {
 			return new DefaultResponse<>(taskService.save(model));
 		} catch (CustomException ex) {
 			return new DefaultResponse<>(ex);
+		} catch (UnauthorizedException ex) {
+			return new DefaultResponse<>(ex);
+		} catch (Exception ex) {
+			return new DefaultResponse<>(ex);
 		}
 	}
 
@@ -51,6 +56,10 @@ public class AchievementController extends BaseController {
 			}
 			return new DefaultResponse<>(new ArrayList<>());
 		} catch (CustomException ex) {
+			return new DefaultResponse<>(ex);
+		} catch (UnauthorizedException ex) {
+			return new DefaultResponse<>(ex);
+		} catch (Exception ex) {
 			return new DefaultResponse<>(ex);
 		}
 	}
@@ -89,6 +98,10 @@ public class AchievementController extends BaseController {
 			return new DefaultResponse<>(taskService.findAllByPatient(idPatient, UserUtils.isPatient(loggedUser)));
 		} catch (CustomException ex) {
 			return new DefaultResponse<>(ex);
+		} catch (UnauthorizedException ex) {
+			return new DefaultResponse<>(ex);
+		} catch (Exception ex) {
+			return new DefaultResponse<>(ex);
 		}
 	}
 
@@ -99,6 +112,10 @@ public class AchievementController extends BaseController {
 			final UserModel loggedUser = getAuthUser(headers);
 			return new DefaultResponse<>(taskService.findAvailableToPatient(idPatient));
 		} catch (CustomException ex) {
+			return new DefaultResponse<>(ex);
+		} catch (UnauthorizedException ex) {
+			return new DefaultResponse<>(ex);
+		} catch (Exception ex) {
 			return new DefaultResponse<>(ex);
 		}
 	}

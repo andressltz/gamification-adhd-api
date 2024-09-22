@@ -2,6 +2,7 @@ package br.feevale.controller;
 
 import br.feevale.core.DefaultResponse;
 import br.feevale.exceptions.CustomException;
+import br.feevale.exceptions.UnauthorizedException;
 import br.feevale.model.SessionModel;
 import br.feevale.model.UserModel;
 import br.feevale.service.SessionService;

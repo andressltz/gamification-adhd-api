@@ -3,8 +3,12 @@ package br.feevale.service;
 import br.feevale.enums.Gender;
 import br.feevale.enums.UserType;
 import br.feevale.exceptions.CustomException;
+import br.feevale.exceptions.ValidationException;
 import br.feevale.model.UserModel;
 import br.feevale.repository.UserRepository;
+import jakarta.persistence.EntityNotFoundException;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -23,6 +27,8 @@ import java.util.List;
 
 @Component
 public class UserService {
+
+	private static final Logger LOG = LogManager.getLogger();
 
 	private static final String PASS_SALT = "u2cHHUAIEDYKkDjCj2FkKHFKo1EtDuiBFEEVALE";
 	private static final String REGEX_EMAIL = "[^\\s]+@[^\\s]+\\.[^\\s]+";
@@ -83,7 +89,7 @@ public class UserService {
 			return Base64.getEncoder().encodeToString(factory.generateSecret(spec).getEncoded());
 		} catch (InvalidKeySpecException | NoSuchAlgorithmException e) {
 			e.printStackTrace();
-			throw new CustomException("Erro ao salvar.");
+			throw new CustomException("Erro ao salvar.", e);
 		}
 	}
 

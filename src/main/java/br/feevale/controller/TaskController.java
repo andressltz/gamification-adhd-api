@@ -3,6 +3,7 @@ package br.feevale.controller;
 import br.feevale.core.DefaultResponse;
 import br.feevale.enums.TaskStatus;
 import br.feevale.exceptions.CustomException;
+import br.feevale.exceptions.UnauthorizedException;
 import br.feevale.model.TaskModel;
 import br.feevale.model.UserModel;
 import br.feevale.service.TaskService;
@@ -39,6 +40,10 @@ public class TaskController extends BaseController {
 			return new DefaultResponse<>(taskService.save(taskModel));
 		} catch (CustomException ex) {
 			return new DefaultResponse<>(ex);
+		} catch (UnauthorizedException ex) {
+			return new DefaultResponse<>(ex);
+		} catch (Exception ex) {
+			return new DefaultResponse<>(ex);
 		}
 	}
 
@@ -53,6 +58,10 @@ public class TaskController extends BaseController {
 			return new DefaultResponse<>(new ArrayList<>());
 		} catch (CustomException ex) {
 			return new DefaultResponse<>(ex);
+		} catch (UnauthorizedException ex) {
+			return new DefaultResponse<>(ex);
+		} catch (Exception ex) {
+			return new DefaultResponse<>(ex);
 		}
 	}
 
@@ -65,6 +74,10 @@ public class TaskController extends BaseController {
 			taskModel.setPatient(null);
 			return new DefaultResponse<>(taskModel);
 		} catch (CustomException ex) {
+			return new DefaultResponse<>(ex);
+		} catch (UnauthorizedException ex) {
+			return new DefaultResponse<>(ex);
+		} catch (Exception ex) {
 			return new DefaultResponse<>(ex);
 		}
 	}
@@ -79,6 +92,10 @@ public class TaskController extends BaseController {
 			return new DefaultResponse<>(taskService.save(taskModel));
 		} catch (CustomException ex) {
 			return new DefaultResponse<>(ex);
+		} catch (UnauthorizedException ex) {
+			return new DefaultResponse<>(ex);
+		} catch (Exception ex) {
+			return new DefaultResponse<>(ex);
 		}
 	}
 
@@ -89,6 +106,10 @@ public class TaskController extends BaseController {
 			final UserModel loggedUser = getAuthUser(headers);
 			return new DefaultResponse<>(taskService.findAllByPatient(idPatient, UserUtils.isPatient(loggedUser)));
 		} catch (CustomException ex) {
+			return new DefaultResponse<>(ex);
+		} catch (UnauthorizedException ex) {
+			return new DefaultResponse<>(ex);
+		} catch (Exception ex) {
 			return new DefaultResponse<>(ex);
 		}
 	}
@@ -101,6 +122,10 @@ public class TaskController extends BaseController {
 			return new DefaultResponse<>(taskService.startTask(idTask, loggedUser));
 		} catch (CustomException ex) {
 			return new DefaultResponse<>(ex);
+		} catch (UnauthorizedException ex) {
+			return new DefaultResponse<>(ex);
+		} catch (Exception ex) {
+			return new DefaultResponse<>(ex);
 		}
 	}
 
@@ -111,6 +136,10 @@ public class TaskController extends BaseController {
 			final UserModel loggedUser = getAuthUser(headers);
 			return new DefaultResponse<>(taskService.playTask(idTask, loggedUser));
 		} catch (CustomException ex) {
+			return new DefaultResponse<>(ex);
+		} catch (UnauthorizedException ex) {
+			return new DefaultResponse<>(ex);
+		} catch (Exception ex) {
 			return new DefaultResponse<>(ex);
 		}
 	}
@@ -123,6 +152,10 @@ public class TaskController extends BaseController {
 			return new DefaultResponse<>(taskService.pauseTask(idTask, loggedUser));
 		} catch (CustomException ex) {
 			return new DefaultResponse<>(ex);
+		} catch (UnauthorizedException ex) {
+			return new DefaultResponse<>(ex);
+		} catch (Exception ex) {
+			return new DefaultResponse<>(ex);
 		}
 	}
 
@@ -134,6 +167,10 @@ public class TaskController extends BaseController {
 			return new DefaultResponse<>(taskService.stopTask(idTask, loggedUser));
 		} catch (CustomException ex) {
 			return new DefaultResponse<>(ex);
+		} catch (UnauthorizedException ex) {
+			return new DefaultResponse<>(ex);
+		} catch (Exception ex) {
+			return new DefaultResponse<>(ex);
 		}
 	}
 
@@ -144,6 +181,10 @@ public class TaskController extends BaseController {
 			final UserModel loggedUser = getAuthUser(headers);
 			return new DefaultResponse<>(taskService.finishTask(idTask, loggedUser));
 		} catch (CustomException ex) {
+			return new DefaultResponse<>(ex);
+		} catch (UnauthorizedException ex) {
+			return new DefaultResponse<>(ex);
+		} catch (Exception ex) {
 			return new DefaultResponse<>(ex);
 		}
 	}

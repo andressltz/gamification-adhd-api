@@ -1,5 +1,7 @@
 package br.feevale.core;
 
+import br.feevale.exceptions.CustomException;
+import br.feevale.exceptions.UnauthorizedException;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Getter;
 import lombok.Setter;
@@ -26,6 +28,18 @@ public class DefaultResponse<T> {
 
 	public DefaultResponse(Exception exception) {
 		this.statusInfo = HttpStatus.BAD_REQUEST;
+		this.status = statusInfo.value();
+		this.error = exception.getMessage();
+	}
+
+	public DefaultResponse(CustomException exception) {
+		this.statusInfo = HttpStatus.BAD_REQUEST;
+		this.status = statusInfo.value();
+		this.error = exception.getMessage();
+	}
+
+	public DefaultResponse(UnauthorizedException exception) {
+		this.statusInfo = HttpStatus.UNAUTHORIZED;
 		this.status = statusInfo.value();
 		this.error = exception.getMessage();
 	}

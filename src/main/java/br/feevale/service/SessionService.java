@@ -1,9 +1,13 @@
 package br.feevale.service;
 
+import br.feevale.enums.UserType;
 import br.feevale.exceptions.CustomException;
+import br.feevale.exceptions.UnauthorizedException;
 import br.feevale.model.SessionModel;
 import br.feevale.model.UserModel;
 import br.feevale.repository.SessionRepository;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -15,6 +19,8 @@ import java.util.UUID;
 
 @Component
 public class SessionService {
+
+	private static final Logger LOGGER = LogManager.getLogger();
 
 	@Autowired
 	private SessionRepository repository;
