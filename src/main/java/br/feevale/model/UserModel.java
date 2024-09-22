@@ -6,10 +6,12 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToMany;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Transient;
 import lombok.Getter;
 import lombok.Setter;
@@ -29,10 +31,8 @@ public class UserModel extends DefaultModel {
 	@Column(nullable = false)
 	private String name;
 
-	@Column(nullable = false)
 	private String email;
 
-	@Column(nullable = false)
 	private String password;
 
 	private String image;
@@ -50,8 +50,11 @@ public class UserModel extends DefaultModel {
 	@ManyToMany
 	private List<UserModel> patients;
 
+	@OneToOne(fetch = FetchType.EAGER)
+	private UserModel loginUser;
+
 	@Transient
-	private String phoneFormated;
+	private String phoneFormatted;
 
 	@Column
 	private Integer qtyStars;
@@ -70,5 +73,11 @@ public class UserModel extends DefaultModel {
 
 	@Transient
 	private Integer maxStars;
+
+	@Transient
+	private List<UserModel> profiles;
+
+	@Transient
+	private boolean isProfile;
 
 }

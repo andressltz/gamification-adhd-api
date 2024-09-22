@@ -35,6 +35,9 @@ public class SessionService {
 				SessionModel userSession = authorize(userRes);
 				userService.cleanUser(userSession.getUser());
 				userSession.setId(null);
+				userRes = userSession.getUser();
+				userRes.setPatients(null);
+				userSession.setUser(userRes);
 				return userSession;
 			}
 		}
@@ -42,12 +45,30 @@ public class SessionService {
 		throw new CustomException("E-mail ou senha inválidos");
 	}
 
+	public SessionModel loginProfile(UserModel userParam, UserModel loggedUser) {
+		if (userParam != null && userParam.getId() != null) {
+			UserModel userRes = userService.findByIdInternal(userParam.getId());
+			if (userRes != null && UserType.PATIENT.equals(userRes.getType()) && userRes.getLoginUser() != null && loggedUser.getId().equals(userRes.getLoginUser().getId())) {
+				SessionModel userSession = authorize(userRes);
+				userService.cleanUser(userSession.getUser());
+				userSession.setId(null);
+				userRes = userSession.getUser();
+				userRes.setPatients(null);
+				userSession.setUser(userRes);
+				return userSession;
+			}
+		}
+
+		throw new CustomException("Login não permitido.");
+	}
+
 	public long getAuthorizedUserId(String token) {
 		SessionModel session = repository.getByToken(token);
-//		if (session != null && session.getExpiration().after(new Date())) {
+		if (session != null) {
 			return session.getUser().getId();
-//		}
-//		throw new CustomException("Usuário não autorizado.");
+		}
+		LOGGER.warn("Usuário {} não autorizado. Refaça o login.", token);
+		throw new UnauthorizedException("Usuário não autorizado. Refaça o login.");
 	}
 
 	private SessionModel authorize(UserModel user) {
