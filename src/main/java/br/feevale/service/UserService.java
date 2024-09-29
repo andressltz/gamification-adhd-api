@@ -85,7 +85,6 @@ public class UserService {
 			user.setDtCreate(new Date());
 			user.setDtUpdate(new Date());
 			user = repository.save(user);
-			cleanUser(user);
 			return user;
 		} catch (ValidationException ex) {
 			LOG.error(ex.getMessage(), ex);
@@ -100,7 +99,6 @@ public class UserService {
 		validateUser(user, validatePass, validateEmail);
 		user.setDtUpdate(new Date());
 		user = repository.save(user);
-		cleanUser(user);
 		return user;
 	}
 
@@ -119,7 +117,7 @@ public class UserService {
 
 	private void validateUser(@NotNull UserModel user, boolean validatePass, boolean validateEmail) throws CustomException {
 		if (user.getEmail() == null || !user.getEmail().trim().matches(REGEX_EMAIL)) {
-			throw new CustomException("E-mail inválido.");
+			throw new ValidationException("E-mail inválido.");
 		}
 
 		if (validatePass && (user.getPassword() == null || !user.getPassword().trim().matches(REGEX_PASSWORD))) {
@@ -168,11 +166,6 @@ public class UserService {
 		} catch (EntityNotFoundException ex) {
 			throw new CustomException("Usuário não localizado.");
 		}
-	}
-
-	public void cleanUser(UserModel user) {
-		user.setPassword(null);
-		user.setLoginUser(null);
 	}
 
 	public UserModel findAndRelatePatient(UserModel loggedUser, UserModel patientParam) {

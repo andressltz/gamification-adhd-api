@@ -179,7 +179,15 @@ public class TaskController extends BaseController {
 	public DefaultResponse<TaskModel> postTaskFinish(@RequestHeader HttpHeaders headers, @PathVariable long idTask) {
 		try {
 			final UserModel loggedUser = getAuthUser(headers);
-			return new DefaultResponse<>(taskService.finishTask(idTask, loggedUser));
+			TaskModel savedTask = taskService.finishTask(idTask, loggedUser);
+
+			if (savedTask != null && savedTask.getPatient() != null) {
+				savedTask.getPatient().setPassword(null);
+				savedTask.getPatient().setLoginUser(null);
+				savedTask.getPatient().setPatients(null);
+			}
+
+			return new DefaultResponse<>(savedTask);
 		} catch (CustomException ex) {
 			return new DefaultResponse<>(ex);
 		} catch (UnauthorizedException ex) {

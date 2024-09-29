@@ -4,7 +4,6 @@ import br.feevale.model.UserModel;
 import br.feevale.service.SessionService;
 import br.feevale.service.UserService;
 import org.apache.logging.log4j.Logger;
-import org.jetbrains.annotations.Nullable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.web.bind.annotation.RestController;

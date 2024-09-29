@@ -25,9 +25,9 @@ public class AuthController extends BaseController {
 
 	@ResponseBody
 	@PostMapping()
-	public DefaultResponse<SessionModel> login(@RequestBody UserModel userParam) {
+	public DefaultResponse<SessionModel> login(@RequestHeader HttpHeaders headers, @RequestBody UserModel userParam) {
 		try {
-			return new DefaultResponse<>(sessionService.login(userParam));
+			return new DefaultResponse<>(sessionService.login(userParam, getAgent(headers)));
 		} catch (CustomException ex) {
 			return new DefaultResponse<>(ex);
 		} catch (UnauthorizedException ex) {
@@ -43,7 +43,7 @@ public class AuthController extends BaseController {
 		try {
 			final UserModel loggedUser = getAuthUser(headers);
 			if (UserUtils.isNotPatient(loggedUser)) {
-				return new DefaultResponse<>(sessionService.loginProfile(userParam, loggedUser));
+				return new DefaultResponse<>(sessionService.loginProfile(userParam, loggedUser, getAgent(headers)));
 			}
 			throw new CustomException("Operação não permitida para pacientes.");
 		} catch (CustomException ex) {

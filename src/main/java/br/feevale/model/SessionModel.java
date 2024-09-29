@@ -32,4 +32,6 @@ public class SessionModel extends DefaultModel {
 	@Column(nullable = false)
 	private Date expiration;
 
+	@Column
+	private String agent;
 }
