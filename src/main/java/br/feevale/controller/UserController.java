@@ -66,6 +66,8 @@ public class UserController extends BaseController {
 				loggedUser.setLoginUser(null);
 				return new DefaultResponse<>(loggedUser);
 			}
+			loggedUser.setPassword(null);
+			loggedUser.setLoginUser(null);
 			return new DefaultResponse<>(loggedUser);
 		} catch (CustomException ex) {
 			return new DefaultResponse<>(ex);
