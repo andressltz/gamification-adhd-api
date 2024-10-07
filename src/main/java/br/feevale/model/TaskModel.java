@@ -55,15 +55,15 @@ public class TaskModel extends DefaultModel {
 	private AchievementModel achievement;
 
 	@Column(nullable = false)
-	private Date dateToStart;
+	private String dateToStart;
 
 	@Column(nullable = false)
-	private Date timeToStart;
+	private String timeToStart;
 
-	private int timeToDo;
+	private String timeToDo;
 
 	@Transient
-	private String timeToDoFormated;
+	private String timeToDoFormatted;
 
 	private Long currentDuration;
 
@@ -79,5 +79,8 @@ public class TaskModel extends DefaultModel {
 	@Enumerated(EnumType.ORDINAL)
 	@Column(nullable = false)
 	private TaskStatus status;
+
+	@Transient
+	private Date dateToStartDate;
 
 }

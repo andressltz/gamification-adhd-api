@@ -16,7 +16,6 @@ public interface TaskRepository extends JpaRepository<TaskModel, Long> {
 	@Query(nativeQuery = true, value = "SELECT * " +
 		" FROM task" +
 		" WHERE patient_id_user = ?1" +
-		" AND date_to_start <= GETDATE()" +
 		" ORDER BY date_to_start")
 	List<TaskModel> findToPatient(long idPatient);
 }

@@ -2,6 +2,7 @@ package br.feevale.service;
 
 import br.feevale.model.UserModel;
 import br.feevale.repository.TaskRepository;
+import br.feevale.utils.CustomStringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -34,16 +35,18 @@ public class LevelService {
 		}
 	}
 
-	public void calculateStars(boolean lostStarDelay, boolean lostStarDoNotDo, int qtyStarsTask, UserModel pacient, int taskTimeToDo, Long taskCurrentDuration) {
+	public void calculateStars(boolean lostStarDelay, boolean lostStarDoNotDo, int qtyStarsTask, UserModel patient, String taskTimeToDoString, Long taskCurrentDuration) {
 		if (lostStarDoNotDo) {
 			//
 		}
+
+		int taskTimeToDo = CustomStringUtils.numberOrZero(taskTimeToDoString);
 		if (lostStarDelay && taskTimeToDo > 0 && taskCurrentDuration != null && taskCurrentDuration > taskTimeToDo) {
-			int totalStarts = userService.lostStars(pacient.getQtyStars(), qtyStarsTask);
-			pacient.setQtyStars(totalStarts);
+			int totalStarts = userService.lostStars(patient.getQtyStars(), qtyStarsTask);
+			patient.setQtyStars(totalStarts);
 		} else {
-			int totalStarts = userService.sumStars(pacient.getQtyStars(), qtyStarsTask);
-			pacient.setQtyStars(totalStarts);
+			int totalStarts = userService.sumStars(patient.getQtyStars(), qtyStarsTask);
+			patient.setQtyStars(totalStarts);
 		}
 	}
 

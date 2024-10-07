@@ -2,10 +2,15 @@ package br.feevale.service;
 
 import br.feevale.enums.TaskStatus;
 import br.feevale.exceptions.CustomException;
+import br.feevale.exceptions.ValidationException;
 import br.feevale.model.TaskModel;
 import br.feevale.model.UserModel;
 import br.feevale.repository.TaskRepository;
+import br.feevale.utils.CustomStringUtils;
 import br.feevale.utils.UserUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -17,6 +22,8 @@ import java.util.Optional;
 
 @Component
 public class TaskService {
+
+	private static final Logger LOG = LogManager.getLogger();
 
 	@Autowired
 	private TaskRepository repository;
@@ -31,10 +38,55 @@ public class TaskService {
 	private LevelService levelService;
 
 	public TaskModel save(TaskModel task) {
-		if (task.getId() == null) {
-			return saveNew(task);
-		} else {
-			return update(task);
+		try {
+			task.setTimeToDo(CustomStringUtils.numberOrNull(task.getTimeToDo()));
+			validateTask(task);
+
+			task.setTimeToStart(task.getDateToStart());
+
+			if (task.getId() == null) {
+				TaskModel savedTask = saveNew(task);
+				savedTask.getPatient().setPassword(null);
+				savedTask.getPatient().setPatients(null);
+				savedTask.getPatient().setPhone(null);
+				savedTask.getPatient().setEmail(null);
+				savedTask.getPatient().setLoginUser(null);
+				savedTask.getPatient().setProfiles(null);
+				return savedTask;
+			} else {
+				TaskModel savedTask = update(task);
+				savedTask.getPatient().setPassword(null);
+				savedTask.getPatient().setPatients(null);
+				savedTask.getPatient().setPhone(null);
+				savedTask.getPatient().setEmail(null);
+				savedTask.getPatient().setLoginUser(null);
+				savedTask.getPatient().setProfiles(null);
+				return savedTask;
+			}
+		} catch (ValidationException ex) {
+			LOG.error(ex.getMessage(), ex);
+			throw new CustomException(ex.getMessage(), ex);
+		} catch (Exception ex) {
+			LOG.error("Erro ao salvar", ex);
+			throw new CustomException("Erro ao salvar.", ex);
+		}
+	}
+
+	private void validateTask(@NotNull TaskModel task) throws CustomException {
+		if (task.getDateToStart() == null || CustomStringUtils.numberOrNull(task.getDateToStart()) == null) {
+			throw new ValidationException("Data inicial inválida.");
+		}
+
+		if (task.getDateToStart().length() == 8) {
+			task.setDateToStart(task.getDateToStart() + "0000");
+		}
+
+		if (task.getDateToStart().length() != 12) {
+			throw new ValidationException("Data inicial inválida.");
+		}
+
+		if (task.getTimeToDo() != null && !task.getTimeToDo().isEmpty() && task.getTimeToDo().length() != 4) {
+			throw new ValidationException("Tempo para realização inválido.");
 		}
 	}
 
@@ -88,9 +140,11 @@ public class TaskService {
 			listTasks = repository.findToPatient(idPatient);
 			List<TaskModel> newListTasks = new ArrayList<>();
 			for (TaskModel task : listTasks) {
-				if (!task.getDateToStart().after(new Date())) {
+				Date dateToStart = CustomStringUtils.stringToDate(task.getDateToStart(), CustomStringUtils.DDMMYYYYHHMM);
+				if (dateToStart != null && !dateToStart.after(new Date())) {
 					task.setPatient(null);
-					task.setTimeToDoFormated(getDurationFormatted(task.getTimeToDo()));
+					task.setTimeToDoFormatted(CustomStringUtils.getDurationFormatted(task.getTimeToDo()));
+					task.setDateToStartDate(dateToStart);
 					if (task.isHasAchievement() && task.getAchievementId() != null) {
 						task.setAchievement(achievementService.findByIdWithoutValidation(task.getAchievementId()));
 					}
@@ -102,10 +156,12 @@ public class TaskService {
 			listTasks = repository.findByPatientId(idPatient);
 			for (TaskModel task : listTasks) {
 				task.setPatient(null);
-				if (task.getDateToStart().after(new Date())) {
+				Date dateToStart = CustomStringUtils.stringToDate(task.getDateToStart(), CustomStringUtils.DDMMYYYYHHMM);
+				if (dateToStart != null && dateToStart.after(new Date())) {
 					task.setStatus(TaskStatus.BLOCKED);
 				}
-				task.setTimeToDoFormated(getDurationFormatted(task.getTimeToDo()));
+				task.setDateToStartDate(dateToStart);
+				task.setTimeToDoFormatted(CustomStringUtils.getDurationFormatted(task.getTimeToDo()));
 			}
 		}
 		return listTasks;
@@ -115,7 +171,7 @@ public class TaskService {
 		TaskModel task = findById(idTask, loggedUser);
 		if (!TaskStatus.DOING.equals(task.getStatus())) {
 			task.setStatus(TaskStatus.DOING);
-			task.setTimeStart(task.getTimeToStart() == null ? new Date() : task.getTimeToStart());
+			task.setTimeStart(task.getTimeToStart() == null ? new Date() : CustomStringUtils.stringToDate(task.getTimeToStart(), CustomStringUtils.DDMMYYYYHHMM));
 			task.setTimePlay(task.getTimePlay() == null ? new Date() : task.getTimePlay());
 			task.setCurrentDuration(task.getCurrentDuration() == null ? 0L : task.getCurrentDuration());
 		}
@@ -189,23 +245,6 @@ public class TaskService {
 
 		task.setPatient(null);
 		return task;
-	}
-
-	private String getDurationFormatted(int timeToDo) {
-		if (timeToDo > 0) {
-			Duration duration = Duration.ofMinutes(timeToDo);
-			StringBuilder formattedDuration = new StringBuilder();
-			int hours = duration.toHoursPart();
-			int minutes = duration.toMinutesPart();
-			if (hours > 0) {
-				formattedDuration.append(hours).append("h ");
-			}
-			if (minutes > 0) {
-				formattedDuration.append(minutes).append("min");
-			}
-			return formattedDuration.toString();
-		}
-		return null;
 	}
 
 	private Long calculateDuration(TaskModel task) {

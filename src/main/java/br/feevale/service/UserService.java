@@ -6,6 +6,7 @@ import br.feevale.exceptions.CustomException;
 import br.feevale.exceptions.ValidationException;
 import br.feevale.model.UserModel;
 import br.feevale.repository.UserRepository;
+import br.feevale.utils.CustomStringUtils;
 import jakarta.persistence.EntityNotFoundException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -19,7 +20,6 @@ import java.nio.charset.StandardCharsets;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.KeySpec;
-import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.Date;
@@ -56,6 +56,8 @@ public class UserService {
 		if (user.getLevel() == null) {
 			user.setLevel(1);
 		}
+
+		user.setPhone(CustomStringUtils.numberOrNull(user.getPhone()));
 
 		if (user.getId() == null) {
 			return saveNewUser(user, isNewPatientRelated, userLoginToPatient);
@@ -159,9 +161,9 @@ public class UserService {
 		try {
 			UserModel userModel = repository.getReferenceById(userId);
 			if (userModel.getPhone() != null) {
-				userModel.setPhoneFormatted(userModel.getPhone().replaceFirst("(\\d{2})(\\d{5})(\\d+)", "($1) $2-$3"));
+				userModel.setPhoneFormatted(CustomStringUtils.formatPhone(userModel.getPhone()));
 			}
-			userModel.setTotalDurationFormatted(getDurationFormatted(userModel.getTotalDuration()));
+			userModel.setTotalDurationFormatted(CustomStringUtils.getDurationFormatted(userModel.getTotalDuration()));
 			return userModel;
 		} catch (EntityNotFoundException ex) {
 			throw new CustomException("Usuário não localizado.");
@@ -228,18 +230,6 @@ public class UserService {
 		patient.setType(UserType.PATIENT);
 		patient = saveNewPatientRelated(patient, loggedUser);
 		return relatePatient(loggedUser, patient);
-	}
-
-	private String getDurationFormatted(Long totalDuration) {
-		if (totalDuration != null) {
-			Duration duration = Duration.ofMinutes(totalDuration);
-			StringBuilder formattedDuration = new StringBuilder();
-			int hours = duration.toHoursPart();
-			int minutes = duration.toMinutesPart();
-			formattedDuration.append(hours).append(":").append(minutes);
-			return formattedDuration.toString();
-		}
-		return null;
 	}
 
 	public List<UserModel> getProfiles(UserModel loggedUser) {
