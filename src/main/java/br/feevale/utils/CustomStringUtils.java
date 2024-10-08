@@ -50,7 +50,6 @@ public class CustomStringUtils {
 		}
 		return null;
 	}
-	// TODO: depois de tudo, precisa ver se o editar e retornar uma exception se comporta certo no front
 
 	public static String sanitizeNumeric(String string) {
 		if (string == null) {

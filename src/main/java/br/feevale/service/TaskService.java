@@ -8,6 +8,7 @@ import br.feevale.model.UserModel;
 import br.feevale.repository.TaskRepository;
 import br.feevale.utils.CustomStringUtils;
 import br.feevale.utils.UserUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
@@ -46,21 +47,11 @@ public class TaskService {
 
 			if (task.getId() == null) {
 				TaskModel savedTask = saveNew(task);
-				savedTask.getPatient().setPassword(null);
-				savedTask.getPatient().setPatients(null);
-				savedTask.getPatient().setPhone(null);
-				savedTask.getPatient().setEmail(null);
-				savedTask.getPatient().setLoginUser(null);
-				savedTask.getPatient().setProfiles(null);
+				patientCleaner(savedTask);
 				return savedTask;
 			} else {
 				TaskModel savedTask = update(task);
-				savedTask.getPatient().setPassword(null);
-				savedTask.getPatient().setPatients(null);
-				savedTask.getPatient().setPhone(null);
-				savedTask.getPatient().setEmail(null);
-				savedTask.getPatient().setLoginUser(null);
-				savedTask.getPatient().setProfiles(null);
+				patientCleaner(savedTask);
 				return savedTask;
 			}
 		} catch (ValidationException ex) {
@@ -72,7 +63,24 @@ public class TaskService {
 		}
 	}
 
+	private void patientCleaner(TaskModel savedTask) {
+		savedTask.getPatient().setPassword(null);
+		savedTask.getPatient().setPatients(null);
+		savedTask.getPatient().setPhone(null);
+		savedTask.getPatient().setEmail(null);
+		savedTask.getPatient().setLoginUser(null);
+		savedTask.getPatient().setProfiles(null);
+	}
+
 	private void validateTask(@NotNull TaskModel task) throws CustomException {
+		if (StringUtils.isEmpty(task.getTitle()) || StringUtils.isEmpty(task.getTitle().trim())) {
+			throw new ValidationException("Título deve ser preenchido.");
+		}
+
+		if (StringUtils.isEmpty(task.getDescription()) || StringUtils.isEmpty(task.getDescription().trim())) {
+			throw new ValidationException("Orientações devem ser preenchidas.");
+		}
+
 		if (task.getDateToStart() == null || CustomStringUtils.numberOrNull(task.getDateToStart()) == null) {
 			throw new ValidationException("Data inicial inválida.");
 		}
