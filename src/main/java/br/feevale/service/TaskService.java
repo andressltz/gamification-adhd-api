@@ -17,6 +17,7 @@ import org.springframework.stereotype.Component;
 
 import java.time.Duration;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -159,6 +160,7 @@ public class TaskService {
 					newListTasks.add(task);
 				}
 			}
+			newListTasks.sort(Comparator.comparing(TaskModel::getDateToStartDate));
 			return newListTasks;
 		} else {
 			listTasks = repository.findByPatientId(idPatient);
