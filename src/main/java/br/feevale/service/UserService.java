@@ -32,7 +32,7 @@ public class UserService {
 
 	private static final String PASS_SALT = "u2cHHUAIEDYKkDjCj2FkKHFKo1EtDuiBFEEVALE";
 	private static final String REGEX_EMAIL = "[^\\s]+@[^\\s]+\\.[^\\s]+";
-	private static final String REGEX_PASSWORD = "[^\\s]{6,10}";
+	private static final String REGEX_PASSWORD = "[^\\s]{6,12}";
 	private static final String REGEX_PHONE = "[^0-9]";
 
 	@Autowired
@@ -70,93 +70,6 @@ public class UserService {
 		return repository.findByEmailAndPassword(email.toLowerCase().trim(), encryptPassword(password.trim()));
 	}
 
-	private UserModel saveNewUser(UserModel user, boolean isNewPatientRelated, UserModel userLoginToPatient) {
-		try {
-			if (isNewPatientRelated) {
-				validateNewUserPatient(user);
-				user.setEmail(null);
-				user.setPassword(null);
-				user.setLoginUser(userLoginToPatient);
-			} else {
-				validateUser(user, true, true);
-				user.setEmail(user.getEmail().toLowerCase().trim());
-				user.setPassword(encryptPassword(user.getPassword().trim()));
-				user.setLoginUser(null);
-			}
-
-			user.setDtCreate(new Date());
-			user.setDtUpdate(new Date());
-			user = repository.save(user);
-			return user;
-		} catch (ValidationException ex) {
-			LOG.error(ex.getMessage(), ex);
-			throw new CustomException(ex.getMessage(), ex);
-		} catch (Exception ex) {
-			LOG.error("Erro ao salvar", ex);
-			throw new CustomException("Erro ao salvar.", ex);
-		}
-	}
-
-	private UserModel update(UserModel user, boolean validatePass, boolean validateEmail) {
-		validateUser(user, validatePass, validateEmail);
-		user.setDtUpdate(new Date());
-		user = repository.save(user);
-		return user;
-	}
-
-	private String encryptPassword(String password) {
-		try {
-			KeySpec spec = new PBEKeySpec(password.toCharArray(), PASS_SALT.getBytes(StandardCharsets.UTF_8), 256, 512);
-
-			SecretKeyFactory factory = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA256");
-
-			return Base64.getEncoder().encodeToString(factory.generateSecret(spec).getEncoded());
-		} catch (InvalidKeySpecException | NoSuchAlgorithmException e) {
-			e.printStackTrace();
-			throw new CustomException("Erro ao salvar.", e);
-		}
-	}
-
-	private void validateUser(@NotNull UserModel user, boolean validatePass, boolean validateEmail) throws CustomException {
-		if (user.getEmail() == null || !user.getEmail().trim().matches(REGEX_EMAIL)) {
-			throw new ValidationException("E-mail inválido.");
-		}
-
-		if (validatePass && (user.getPassword() == null || !user.getPassword().trim().matches(REGEX_PASSWORD))) {
-			throw new ValidationException("Senha inválida. A senha deve conter entre 6 e 10 caracteres.");
-		}
-
-		if (user.getName() == null || user.getName().trim().equals("")) {
-			throw new ValidationException("Nome inválido.");
-		}
-
-		if (user.getType() == null) {
-			throw new ValidationException("Tipo de usuário não informado.");
-		}
-
-		if (validateEmail && repository.findByEmail(user.getEmail().toLowerCase().trim()) != null) {
-			throw new ValidationException("E-mail já cadastrado.");
-		}
-
-		if (user.getPhone() != null && !user.getPhone().isEmpty() && user.getPhone().replaceAll(REGEX_PHONE, "").length() != 11) {
-			throw new ValidationException("O telefone deve ser no formato (11) 98765-4321");
-		}
-	}
-
-	private void validateNewUserPatient(@NotNull UserModel user) throws CustomException {
-		if (user.getName() == null || user.getName().trim().equals("")) {
-			throw new ValidationException("Nome inválido.");
-		}
-
-		if (user.getType() == null) {
-			throw new ValidationException("Tipo de usuário não informado.");
-		}
-
-		if (user.getPhone() != null && !user.getPhone().isEmpty() && user.getPhone().replaceAll(REGEX_PHONE, "").length() != 11) {
-			throw new ValidationException("O telefone deve ser no formato (11) 98765-4321");
-		}
-	}
-
 	public UserModel findByIdInternal(Long userId) {
 		try {
 			UserModel userModel = repository.getReferenceById(userId);
@@ -168,6 +81,10 @@ public class UserService {
 		} catch (EntityNotFoundException ex) {
 			throw new CustomException("Usuário não localizado.");
 		}
+	}
+
+	public UserModel getUser(Long userId) {
+		return repository.findById(userId).get();
 	}
 
 	public UserModel findAndRelatePatient(UserModel loggedUser, UserModel patientParam) {
@@ -245,5 +162,92 @@ public class UserService {
 			}
 		}
 		return cleanProfiles;
+	}
+
+	private UserModel saveNewUser(UserModel user, boolean isNewPatientRelated, UserModel userLoginToPatient) {
+		try {
+			if (isNewPatientRelated) {
+				validateNewUserPatient(user);
+				user.setEmail(null);
+				user.setPassword(null);
+				user.setLoginUser(userLoginToPatient);
+			} else {
+				validateUser(user, true, true);
+				user.setEmail(user.getEmail().toLowerCase().trim());
+				user.setPassword(encryptPassword(user.getPassword().trim()));
+				user.setLoginUser(null);
+			}
+
+			user.setDtCreate(new Date());
+			user.setDtUpdate(new Date());
+			user = repository.save(user);
+			return user;
+		} catch (ValidationException ex) {
+			LOG.error(ex.getMessage(), ex);
+			throw new CustomException(ex.getMessage(), ex);
+		} catch (Exception ex) {
+			LOG.error("Erro ao salvar", ex);
+			throw new CustomException("Erro ao salvar.", ex);
+		}
+	}
+
+	private UserModel update(UserModel user, boolean validatePass, boolean validateEmail) {
+		validateUser(user, validatePass, validateEmail);
+		user.setDtUpdate(new Date());
+		user = repository.save(user);
+		return user;
+	}
+
+	private String encryptPassword(String password) {
+		try {
+			KeySpec spec = new PBEKeySpec(password.toCharArray(), PASS_SALT.getBytes(StandardCharsets.UTF_8), 256, 512);
+
+			SecretKeyFactory factory = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA256");
+
+			return Base64.getEncoder().encodeToString(factory.generateSecret(spec).getEncoded());
+		} catch (InvalidKeySpecException | NoSuchAlgorithmException e) {
+			e.printStackTrace();
+			throw new CustomException("Erro ao salvar.", e);
+		}
+	}
+
+	private void validateUser(@NotNull UserModel user, boolean validatePass, boolean validateEmail) throws CustomException {
+		if (validateEmail && (user.getEmail() == null || !user.getEmail().trim().matches(REGEX_EMAIL))) {
+			throw new ValidationException("E-mail inválido.");
+		}
+
+		if (validatePass && (user.getPassword() == null || !user.getPassword().trim().matches(REGEX_PASSWORD))) {
+			throw new ValidationException("Senha inválida. A senha deve conter entre 6 e 12 caracteres.");
+		}
+
+		if (user.getName() == null || user.getName().trim().equals("")) {
+			throw new ValidationException("Nome inválido.");
+		}
+
+		if (user.getType() == null) {
+			throw new ValidationException("Tipo de usuário não informado.");
+		}
+
+		if (validateEmail && repository.findByEmail(user.getEmail().toLowerCase().trim()) != null) {
+			throw new ValidationException("E-mail já cadastrado.");
+		}
+
+		if (user.getPhone() != null && !user.getPhone().isEmpty() && user.getPhone().replaceAll(REGEX_PHONE, "").length() != 11) {
+			throw new ValidationException("O telefone deve ser no formato (11) 98765-4321");
+		}
+	}
+
+	private void validateNewUserPatient(@NotNull UserModel user) throws CustomException {
+		if (user.getName() == null || user.getName().trim().equals("")) {
+			throw new ValidationException("Nome inválido.");
+		}
+
+		if (user.getType() == null) {
+			throw new ValidationException("Tipo de usuário não informado.");
+		}
+
+		if (user.getPhone() != null && !user.getPhone().isEmpty() && user.getPhone().replaceAll(REGEX_PHONE, "").length() != 11) {
+			throw new ValidationException("O telefone deve ser no formato (11) 98765-4321");
+		}
 	}
 }

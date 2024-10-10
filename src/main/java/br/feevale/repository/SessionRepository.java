@@ -1,8 +1,8 @@
 package br.feevale.repository;
 
 import br.feevale.model.SessionModel;
-import br.feevale.model.UserModel;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 
 import java.util.List;
 
@@ -14,5 +14,8 @@ public interface SessionRepository extends JpaRepository<SessionModel, Long> {
 
 	SessionModel getByToken(String token);
 
-	List<SessionModel> getByUser(UserModel user);
+	@Query(nativeQuery = true, value = "SELECT * " +
+		" FROM app_session " +
+		" WHERE user_id_user = ?1")
+	List<SessionModel> getByUserId(long idUser);
 }

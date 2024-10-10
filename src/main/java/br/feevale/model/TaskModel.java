@@ -1,6 +1,7 @@
 package br.feevale.model;
 
 import br.feevale.enums.TaskStatus;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -20,7 +21,8 @@ import java.util.Date;
 @Getter
 @Setter
 @Entity(name = "task")
-public class TaskModel extends DefaultModel {
+@JsonInclude(JsonInclude.Include.NON_NULL)
+public class TaskModel {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -82,5 +84,11 @@ public class TaskModel extends DefaultModel {
 
 	@Transient
 	private Date dateToStartDate;
+
+	@Column(name = "dt_create")
+	private Date dtCreate;
+
+	@Column(name = "dt_update")
+	private Date dtUpdate;
 
 }

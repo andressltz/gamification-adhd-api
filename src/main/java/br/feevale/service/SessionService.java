@@ -8,6 +8,7 @@ import br.feevale.model.UserModel;
 import br.feevale.repository.SessionRepository;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.jetbrains.annotations.Nullable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -32,32 +33,18 @@ public class SessionService {
 		if (userParam != null && userParam.getEmail() != null && userParam.getPassword() != null) {
 			UserModel userRes = userService.findByEmailAndPassword(userParam.getEmail(), userParam.getPassword());
 			if (userRes != null) {
-				SessionModel userSession = authorize(userRes, agent);
-				userRes = userSession.getUser();
-				userRes.setPassword(null);
-				userRes.setLoginUser(null);
-				userRes.setPatients(null);
-				userSession.setUser(userRes);
-				userSession.setId(null);
-				return userSession;
+				return authorizeAndReturnSessionWithCleanUser(agent, userRes);
 			}
 		}
 
 		throw new CustomException("E-mail ou senha inválidos");
 	}
 
-	public SessionModel loginProfile(UserModel userParam, UserModel loggedUser, String agent) {
+	public SessionModel loginProfile(UserModel userParam, Long loggedUserId, String agent) {
 		if (userParam != null && userParam.getId() != null) {
-			UserModel userRes = userService.findByIdInternal(userParam.getId());
-			if (userRes != null && UserType.PATIENT.equals(userRes.getType()) && userRes.getLoginUser() != null && loggedUser.getId().equals(userRes.getLoginUser().getId())) {
-				SessionModel userSession = authorize(userRes, agent);
-				userRes = userSession.getUser();
-				userRes.setPassword(null);
-				userRes.setLoginUser(null);
-				userRes.setPatients(null);
-				userSession.setUser(userRes);
-				userSession.setId(null);
-				return userSession;
+			UserModel userRes = userService.getUser(userParam.getId());
+			if (userRes != null && UserType.PATIENT.equals(userRes.getType()) && userRes.getLoginUser() != null && loggedUserId.equals(userRes.getLoginUser().getId())) {
+				return authorizeAndReturnSessionWithCleanUser(agent, userRes);
 			}
 		}
 
@@ -73,19 +60,20 @@ public class SessionService {
 		throw new UnauthorizedException("Usuário não autorizado. Refaça o login.");
 	}
 
-	private SessionModel authorize(UserModel user, String agent) {
-		if (user == null) {
+	private SessionModel authorize(Long idUser, String agent) {
+		if (idUser == null) {
 			return null;
 		}
 
-		List<SessionModel> sessions = repository.getByUser(user);
+		List<SessionModel> sessions = repository.getByUserId(idUser);
 		if (sessions != null && !sessions.isEmpty()) {
 			return sessions.stream().findFirst().get();
 		}
-		return createNewSession(user, agent);
+		return createNewSession(idUser, agent);
 	}
 
-	private SessionModel createNewSession(UserModel user, String agent) {
+	private SessionModel createNewSession(long userId, String agent) {
+		UserModel user = userService.findByIdInternal(userId);
 		SessionModel newSession = new SessionModel();
 		newSession.setUser(user);
 		newSession.setToken(UUID.randomUUID().toString());
@@ -96,7 +84,6 @@ public class SessionService {
 
 		newSession = repository.save(newSession);
 
-		user = newSession.getUser();
 		user.setPassword(null);
 		user.setLoginUser(null);
 		user.setPatients(null);
@@ -104,6 +91,19 @@ public class SessionService {
 		newSession.setUser(user);
 		newSession.setId(null);
 		return newSession;
+	}
+
+	@Nullable
+	private SessionModel authorizeAndReturnSessionWithCleanUser(String agent, UserModel userRes) {
+		SessionModel userSession = authorize(userRes.getId(), agent);
+		if (userSession != null) {
+			userRes.setPassword(null);
+			userRes.setLoginUser(null);
+			userRes.setPatients(null);
+			userSession.setUser(userRes);
+			userSession.setId(null);
+		}
+		return userSession;
 	}
 
 }

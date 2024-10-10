@@ -1,6 +1,7 @@
 package br.feevale.model;
 
 import br.feevale.enums.AchievementStatus;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -16,7 +17,8 @@ import java.util.Date;
 @Getter
 @Setter
 @Entity(name = "achievement")
-public class AchievementModel extends DefaultModel {
+@JsonInclude(JsonInclude.Include.NON_NULL)
+public class AchievementModel {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -39,5 +41,11 @@ public class AchievementModel extends DefaultModel {
 	private AchievementStatus status;
 
 	private String image;
+
+	@Column(name = "dt_create")
+	private Date dtCreate;
+
+	@Column(name = "dt_update")
+	private Date dtUpdate;
 
 }

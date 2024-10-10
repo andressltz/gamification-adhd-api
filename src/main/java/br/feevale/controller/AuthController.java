@@ -43,7 +43,7 @@ public class AuthController extends BaseController {
 		try {
 			final UserModel loggedUser = getAuthUser(headers);
 			if (UserUtils.isNotPatient(loggedUser)) {
-				return new DefaultResponse<>(sessionService.loginProfile(userParam, loggedUser, getAgent(headers)));
+				return new DefaultResponse<>(sessionService.loginProfile(userParam, loggedUser.getId(), getAgent(headers)));
 			}
 			throw new CustomException("Operação não permitida para pacientes.");
 		} catch (CustomException ex) {
